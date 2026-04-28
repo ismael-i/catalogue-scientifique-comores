@@ -1,0 +1,39 @@
+import { ArticleCardProps } from "@/types/article";
+
+
+export function ArticleCard({
+  date,
+  title,
+  description,
+  imageUrl,
+  imageAlt,
+}: ArticleCardProps) {
+  return (
+    <div className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col">
+      {/* Image */}
+      <div className="h-48 overflow-hidden bg-slate-100">
+        <img
+          src={imageUrl}
+          alt={imageAlt}
+          className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"
+        />
+      </div>
+
+      {/* Contenu */}
+      <div className="p-5 flex flex-col gap-2 flex-1">
+        {/* Date */}
+        <span className="text-xs text-slate-400">{date}</span>
+
+        {/* Titre */}
+        <h3 className="text-sm font-semibold text-slate-800 leading-snug group-hover:text-blue-500 transition-colors">
+          {title}
+        </h3>
+
+        {/* Description */}
+        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 flex-1">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}

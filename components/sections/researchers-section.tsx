@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { ResearcherCard } from './researcher-card'
+
 import { ArrowRight } from 'lucide-react'
+import { ResearcherCard } from '../cards/researcher-card'
 
 const researchers = [
   {
@@ -10,42 +11,36 @@ const researchers = [
     name: 'Dr Nadjim Ahmed Mohamed',
     affiliation: 'UDC / FST',
     specialty: 'Écosystème et Biodiversité marine, pollution marine et côtière',
-    avatar: null,
   },
   {
     id: '2',
     name: 'Dr Azali Ahamada',
     affiliation: 'UDC / FST',
     specialty: 'Aliments, Réactivité et Synthèse des Substances Naturelles',
-    avatar: null,
   },
   {
     id: '3',
     name: 'Mme Sara Said Anli',
     affiliation: 'UDC / FST',
     specialty: 'Géosciences et Environnement',
-    avatar: null,
   },
   {
     id: '4',
     name: 'Abdoulanfour Abdou',
     affiliation: 'Bureau Géologique des Comores',
     specialty: 'Géophysique, géologie, géochimie',
-    avatar: null,
   },
   {
     id: '5',
     name: 'Dr Soilhi Mohamed',
     affiliation: 'UDC / FST',
     specialty: 'Études et données scientifiques sur les secteurs informels et...',
-    avatar: null,
   },
   {
     id: '6',
     name: 'Dr Chakira Hamada',
     affiliation: 'UDC / FST',
     specialty: 'Entomologie, Neurosciences et Santé',
-    avatar: null,
   },
 ]
 

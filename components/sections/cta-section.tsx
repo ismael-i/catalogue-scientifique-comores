@@ -6,8 +6,8 @@ import { ArrowRight } from 'lucide-react'
 export function CTASection() {
   return (
     <section className="w-full bg-white py-12">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="bg-gradient-to-r from-blue-500 via-teal-500 to-teal-600 rounded-2xl py-12 px-8 md:px-16 text-center">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="bg-gradient-to-r from-blue-500 via-teal-500 to-teal-600 rounded-2xl py-12 px-6 md:px-16 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Vous êtes chercheur aux Comores ?
           </h2>

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight , Users, FlaskConical, BookOpen, Building2 } from 'lucide-react'
 
 export function Hero() {
   return (
@@ -63,29 +63,32 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="bg-white border-t border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 py-12">
+ `   {/* Stats Section */}
+      `<div className="bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <p className="text-4xl font-bold text-blue-500 mb-2">45</p>
-              <p className="text-sm text-gray-600">Chercheurs</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-bold text-blue-500 mb-2">28</p>
-              <p className="text-sm text-gray-600">Laboratoires</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-bold text-blue-500 mb-2">12</p>
-              <p className="text-sm text-gray-600">Publications</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-bold text-blue-500 mb-2">5</p>
-              <p className="text-sm text-gray-600">Institutions</p>
-            </div>
+
+            {[
+              { icon: Users,         value: 45, label: "Chercheurs"   },
+              { icon: FlaskConical,  value: 28, label: "Laboratoires" },
+              { icon: BookOpen,      value: 12, label: "Publications"  },
+              { icon: Building2,     value: 5,  label: "Institutions"  },
+            ].map(({ icon: Icon, value, label }) => (
+              <div key={label} className="flex flex-col items-center gap-2">
+                {/* Icône dans son carré */}
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-blue-500" strokeWidth={1.6} />
+                </div>
+                {/* Chiffre */}
+                <p className="text-3xl font-bold text-slate-800">{value}</p>
+                {/* Label */}
+                <p className="text-sm text-gray-500">{label}</p>
+              </div>
+            ))}
+
           </div>
         </div>
-      </div>
+      </div>``
     </section>
   )
 }
