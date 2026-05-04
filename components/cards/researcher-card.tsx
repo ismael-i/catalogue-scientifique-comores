@@ -23,8 +23,8 @@ export function ResearcherCard({ name, affiliation, specialty, avatar }: Researc
               className="w-12 h-12 rounded-full object-cover"
             />
           ) : (
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Users size={24} className="text-blue-500" />
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <Users size={24} className="text-gray-500" />
             </div>
           )}
         </div>
