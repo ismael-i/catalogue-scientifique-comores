@@ -1,11 +1,20 @@
 // ── Types de données ────────────────────────────────────────────────
 
+export type LabDomain =
+  | 'Environnement'
+  | 'Sciences'
+  | 'Santé'
+  | 'Économie'
+  | 'Lettres'
+
 export interface Laboratoire {
   acronym: string;
   name: string;
   description: string;
   researchers: number;
-  institution: string;
+  institution: string;          // institution display name
+  institutionAcronym?: string;  // institution acronym (used for filtering)
+  domain?: LabDomain;           // domain badge displayed on institution detail
 }
 
 export interface Institution {
@@ -13,6 +22,7 @@ export interface Institution {
   name: string;
   description: string;
   logo?: string; // URL optionnelle du logo
+  logoBg?: string; // couleur de fond optionnelle pour le placeholder logo (classe Tailwind)
 }
 
 export interface SectionProps {
@@ -92,8 +102,37 @@ export interface LaboratoireDetail {
   institutionId: string // FK → table institutions
 }
 
-// ── Version allégée pour les listings (pas de champs lourds) ─────────
-export type LaboratoireCard = Pick<
-  LaboratoireDetail,
-  'id' | 'acronym' | 'name' | 'description' | 'categorie' | 'researchers' | 'institution'
->
+// ── Publications ────────────────────────────────────────────────────
+
+export type PublicationDomain =
+  | 'Environnement'
+  | 'Sciences'
+  | 'Santé'
+  | 'Économie'
+  | 'Lettres'
+
+export type PublicationType =
+  | 'Article Scientifique'
+  | 'Communication De Conférence'
+
+export interface PublicationAuthor {
+  name: string
+  institution?: string
+  faculty?: string
+}
+
+export interface Publication {
+  id: string
+  title: string
+  domain: PublicationDomain
+  year: number
+  type: PublicationType
+  authors: string[]
+  journal: string
+  description: string
+  keywords: string[]
+  laboratoire?: string
+  institutionAcronym?: string  // institution acronym to filter by
+  detailedAuthors?: PublicationAuthor[]
+  pdfUrl?: string
+}

@@ -15,7 +15,7 @@ export default function LabPage() {
           viewAllLabel="Voir tous →"
           cols={3}
         >
-          {labos.map((labo) => (
+         {labos.slice(0, 6).map((labo) => (
             <LabCard key={labo.acronym} {...labo} />
           ))}
         </Section>
@@ -27,7 +27,7 @@ export default function LabPage() {
           viewAllLabel="Voir toutes →"
           cols={3}
         >
-          {institutions.map((inst) => (
+          {institutions && institutions.slice(0, 3).map((inst) => (
             <InstitutionCard key={inst.acronym} {...inst} />
           ))}
         </Section>

@@ -13,4 +13,7 @@ next.user-config.*
 # Common ignores
 node_modules
 .next/
+.claude/
 .DS_Store
+
+CLAUDE.md

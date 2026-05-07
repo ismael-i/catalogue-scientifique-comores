@@ -45,9 +45,9 @@ export default function Home() {
                 viewAllLabel="Voir tout →"
                 cols={3}
               >
-                {articles.map((article) => (
-                  <ArticleCard key={article.id} {...article} />
-                ))}
+              {articles.slice(0, 3).map((article) => (
+                <ArticleCard key={article.id} {...article} />
+              ))}
               </Section>
             </div>
         </section>
