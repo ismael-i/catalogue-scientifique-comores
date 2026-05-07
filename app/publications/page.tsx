@@ -12,10 +12,12 @@ import {
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Spinner } from '@/components/ui/spinner'
+import { Pagination } from '@/components/Pagination'
 
 const ALL_DOMAINS = '' as const
 const ALL_YEARS = '' as const
 const FETCH_DELAY_MS = 600
+const ITEMS_PER_PAGE = 8
 
 const PublicationsPage = () => {
   const [items, setItems] = useState<Publication[]>([])
@@ -23,6 +25,7 @@ const PublicationsPage = () => {
   const [search, setSearch] = useState('')
   const [domain, setDomain] = useState<PublicationDomain | ''>(ALL_DOMAINS)
   const [year, setYear] = useState<number | ''>(ALL_YEARS)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,6 +53,17 @@ const PublicationsPage = () => {
       return matchSearch && matchDomain && matchYear
     })
   }, [items, search, domain, year])
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [search, domain, year])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE))
+  const paginated = filtered.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
+  )
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -149,13 +163,22 @@ const PublicationsPage = () => {
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {filtered.map((p) => (
-                <li key={p.id}>
-                  <PublicationListItem publication={p} />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="flex flex-col gap-3">
+                {paginated.map((p) => (
+                  <li key={p.id}>
+                    <PublicationListItem publication={p} />
+                  </li>
+                ))}
+              </ul>
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              )}
+            </>
           )}
         </div>
       </main>

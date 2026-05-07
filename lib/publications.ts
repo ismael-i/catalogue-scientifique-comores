@@ -14,6 +14,7 @@ export const publications: Publication[] = [
       'Cette étude analyse les changements du littoral de l’île de Ngazidja à l’aide de la télédétection, des SIG et d’enquêtes de terrain.',
     keywords: ['télédétection', 'SIG', 'érosion côtière', 'Ngazidja'],
     laboratoire: 'LSML',
+    institutionAcronym: 'UDC',
     detailedAuthors: [
       { name: 'Dr Nadjim Ahmed Mohamed', institution: 'UDC', faculty: 'FST' },
     ],
@@ -30,6 +31,7 @@ export const publications: Publication[] = [
       'Compte-rendu de l’atelier régional sur l’imagerie benthique de l’océan Indien occidental.',
     keywords: ['imagerie benthique', 'océan Indien', 'IIOE-2'],
     laboratoire: 'LSML',
+    institutionAcronym: 'UDC',
   },
   {
     id: 'coastal-vulnerability-ngazidja-2022',
@@ -44,6 +46,7 @@ export const publications: Publication[] = [
       'Évaluation préliminaire de la vulnérabilité côtière de l’île de Ngazidja dans l’archipel des Comores.',
     keywords: ['vulnérabilité côtière', 'Ngazidja', 'Comores'],
     laboratoire: 'LSML',
+    institutionAcronym: 'UDC',
   },
   {
     id: 'risk-coastal-erosion-ngazidja-2022',
@@ -57,6 +60,7 @@ export const publications: Publication[] = [
     description: 'Évaluation des risques d’érosion côtière de l’île de Ngazidja.',
     keywords: ['érosion côtière', 'risques', 'Ngazidja'],
     laboratoire: 'LSML',
+    institutionAcronym: 'UDC',
   },
   {
     id: 'phyllarthron-bignoniaceae-2011',
@@ -68,6 +72,7 @@ export const publications: Publication[] = [
     journal: 'Éditions Universitaires Européennes',
     description: 'Étude des propriétés des feuilles de Phyllarthron madagascariense.',
     keywords: ['Phyllarthron', 'BIGNONIACEAE', 'botanique'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'cycas-comores-2014',
@@ -81,6 +86,7 @@ export const publications: Publication[] = [
     description:
       'Analyse de l’utilisation et de la composition chimique et nutritionnelle des fruits de Cycas des Comores.',
     keywords: ['Cycas', 'nutrition', 'Comores', 'chimie'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'malaria-comoro-islands-2017',
@@ -93,6 +99,7 @@ export const publications: Publication[] = [
     description:
       'Revue historique du contrôle du paludisme dans les Iles Comores au cours du siècle dernier.',
     keywords: ['paludisme', 'malaria', 'Comores', 'contrôle'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'starches-cycas-ntsambu-2024',
@@ -106,6 +113,7 @@ export const publications: Publication[] = [
     description:
       'Propriétés physicochimiques et fonctionnelles des amidons de farine de fruits de Cycas des Comores.',
     keywords: ['Cycas', 'Ntsambu', 'amidon', 'Comores'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'microcredit-double-sanction-2025',
@@ -124,6 +132,7 @@ export const publications: Publication[] = [
     description:
       'Modélisation markovienne des contrats de microcrédit avec double sanction sociale.',
     keywords: ['microcrédit', 'Markov', 'microfinance'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'shikomor-ndzuani-2025',
@@ -137,6 +146,7 @@ export const publications: Publication[] = [
     description:
       'Analyse des politiques linguistiques et de la didactique du shikomor dans le système éducatif de Ndzuani.',
     keywords: ['shikomor', 'linguistique', 'éducation', 'Ndzuani'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'ntrimba-nioumakele-anjouan-2020',
@@ -149,6 +159,7 @@ export const publications: Publication[] = [
     description:
       'Étude du Ntrimba de Nioumakélé, rite agraire séculaire de l’Île d’Anjouan.',
     keywords: ['Ntrimba', 'Anjouan', 'rite agraire', 'anthropologie'],
+    institutionAcronym: 'UDC',
   },
   {
     id: 'pomdp-microfinance-choquet-2025',
@@ -162,8 +173,14 @@ export const publications: Publication[] = [
     description:
       'Cadre POMDP coopératif avec intégrale de Choquet hiérarchique pour la gouvernance multi-niveaux en microfinance.',
     keywords: ['POMDP', 'microfinance', 'Choquet', 'gouvernance'],
+    institutionAcronym: 'UDC',
   },
 ]
+
+export const getPublicationsByInstitution = (acronym: string): Publication[] =>
+  publications.filter(
+    (p) => p.institutionAcronym?.toLowerCase() === acronym.toLowerCase(),
+  )
 
 export const PUBLICATION_DOMAINS: PublicationDomain[] = [
   'Environnement',

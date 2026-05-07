@@ -1,11 +1,20 @@
 // ── Types de données ────────────────────────────────────────────────
 
+export type LabDomain =
+  | 'Environnement'
+  | 'Sciences'
+  | 'Santé'
+  | 'Économie'
+  | 'Lettres'
+
 export interface Laboratoire {
   acronym: string;
   name: string;
   description: string;
   researchers: number;
-  institution: string;
+  institution: string;          // institution display name
+  institutionAcronym?: string;  // institution acronym (used for filtering)
+  domain?: LabDomain;           // domain badge displayed on institution detail
 }
 
 export interface Institution {
@@ -13,6 +22,7 @@ export interface Institution {
   name: string;
   description: string;
   logo?: string; // URL optionnelle du logo
+  logoBg?: string; // couleur de fond optionnelle pour le placeholder logo (classe Tailwind)
 }
 
 export interface SectionProps {
@@ -68,6 +78,7 @@ export interface Publication {
   description: string
   keywords: string[]
   laboratoire?: string
+  institutionAcronym?: string  // institution acronym to filter by
   detailedAuthors?: PublicationAuthor[]
   pdfUrl?: string
 }
