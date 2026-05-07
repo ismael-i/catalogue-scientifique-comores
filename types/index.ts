@@ -37,3 +37,37 @@ export interface Chercheur {
 }
 
 export type ViewMode = 'grid' | 'list'  // toggle grille / liste
+
+// ── Publications ────────────────────────────────────────────────────
+
+export type PublicationDomain =
+  | 'Environnement'
+  | 'Sciences'
+  | 'Santé'
+  | 'Économie'
+  | 'Lettres'
+
+export type PublicationType =
+  | 'Article Scientifique'
+  | 'Communication De Conférence'
+
+export interface PublicationAuthor {
+  name: string
+  institution?: string
+  faculty?: string
+}
+
+export interface Publication {
+  id: string
+  title: string
+  domain: PublicationDomain
+  year: number
+  type: PublicationType
+  authors: string[]
+  journal: string
+  description: string
+  keywords: string[]
+  laboratoire?: string
+  detailedAuthors?: PublicationAuthor[]
+  pdfUrl?: string
+}
