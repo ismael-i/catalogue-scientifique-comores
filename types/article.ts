@@ -1,39 +1,18 @@
-// ── Types de données ────────────────────────────────────────────────
-
-export interface Laboratoire {
-  acronym: string;
-  name: string;
-  description: string;
-  researchers: number;
-  institution: string;
-}
-
-export interface Institution {
-  acronym: string;
-  name: string;
-  description: string;
-  logo?: string; // URL optionnelle du logo
-}
-
-export interface SectionProps {
-  title: string;
-  subtitle: string;
-  viewAllLabel?: string;
-  cols?: 2 | 3 | 4;
-  children: React.ReactNode;
-}
-
-export interface LabCardProps extends Laboratoire {}
-
-export interface InstitutionCardProps extends Institution {}
+// ── Article (fil info) ───────────────────────────────────────────────
 
 export interface Article {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  imageAlt: string;
+  id: string
+  date: string                    // formatted French date, e.g. "15 mars 2025"
+  title: string
+  description: string             // short summary used on cards
+  imageUrl?: string               // cover image (optional)
+  imageAlt?: string
+  tags: string[]
+  body: string[]                  // body paragraphs (detail page)
+  authorName: string
+  authorPhotoUrl?: string
+  laboratoryAcronym?: string
+  laboratoryName?: string
 }
 
 export interface ArticleCardProps extends Article {}

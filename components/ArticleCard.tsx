@@ -1,3 +1,4 @@
+import { Newspaper } from "lucide-react";
 import { ArticleCardProps } from "@/types/article";
 
 
@@ -11,12 +12,19 @@ export function ArticleCard({
   return (
     <div className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col">
       {/* Image */}
-      <div className="h-48 overflow-hidden bg-slate-100">
-        <img
-          src={imageUrl}
-          alt={imageAlt}
-          className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"
-        />
+      <div className="h-48 overflow-hidden bg-slate-100 flex items-center justify-center">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={imageAlt ?? ''}
+            className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-cyan-50 to-sky-100 flex items-center justify-center">
+            <Newspaper className="w-10 h-10 text-sky-300" />
+          </div>
+        )}
       </div>
 
       {/* Contenu */}
