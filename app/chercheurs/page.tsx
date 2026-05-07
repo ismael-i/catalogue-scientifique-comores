@@ -4,11 +4,12 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Search, Filter, LayoutGrid, List } from 'lucide-react'
 import type { Chercheur, ViewMode } from '@/types'
-import { ChercheurCard } from '@/components/cards/researchercardPage'
+import { ChercheurCard } from '@/components/researcher/researchercardPage'
 import { ChercheurSkeletonList } from '@/components/ChercheurSkeleton'
 import { Pagination } from '@/components/Pagination'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { MOCK_CHERCHEURS, MOCK_RELATED } from '@/lib/data'
 
 // ── Constantes ───────────────────────────────────────────────────────
 const ITEMS_PER_PAGE = 12
@@ -191,20 +192,3 @@ export default function ChercheurPage() {
   )
 }
 
-// ── Données fictives (dev) ───────────────────────────────────────────
-const MOCK_CHERCHEURS: Chercheur[] = [
-  { id: '1',  name: 'Dr Nadjim Ahmed Mohamed',      institution: 'UDC', faculty: 'FST', specialty: 'Écosystème et Biodiversité marine, pollution marine et côtière' },
-  { id: '2',  name: 'Dr Andiliyat Said Mohamed',    institution: 'UDC', faculty: 'FST', specialty: 'Biodiversité, botanique, géomatique' },
-  { id: '3',  name: 'Dr Said Hassani Mohamed',      institution: 'UDC', faculty: 'FST', specialty: 'Biologie et Santé' },
-  { id: '4',  name: 'Dr Malik El-Houyoun Ahamada',  institution: 'UDC', faculty: 'FST', specialty: 'Énergétique et mécanique appliquée' },
-  { id: '5',  name: 'Dr Salim Ahmed',               institution: 'UDC', faculty: 'FST', specialty: 'Physique de l\'environnement et du climat' },
-  { id: '6',  name: 'Dr Halassi Abdoulhafar',       institution: 'UDC', faculty: 'FST', specialty: 'Mathématiques, Informatique et IA' },
-  { id: '7',  name: 'Dr Azali Ahamada',             institution: 'UDC', faculty: 'FST', specialty: 'Aliments, Réactivité et Synthèse des Substances Naturelles' },
-  { id: '8',  name: 'Dr Ibrahim Said Ali',          institution: 'UDC', faculty: 'FST', specialty: 'Valorisation des ressources alimentaires locales' },
-  { id: '9',  name: 'Rastami Ahamadi',              institution: 'UDC', faculty: 'FST', specialty: 'Inventaires des plantes médicinales et aromatiques' },
-  { id: '10', name: 'Allaoui Ahamadi',              institution: 'UDC', faculty: 'FST', specialty: 'Santé des plantes et animaux' },
-  { id: '11', name: 'Dr Anli Mohamed',              institution: 'UDC', faculty: 'FST', specialty: 'Valorisation et transformation des déchets' },
-  { id: '12', name: 'Dr Mohamed Abdou',             institution: 'BGC', specialty: 'Gestion et exploitation des ressources géologiques' },
-  { id: '13', name: 'Dr Azali Ahamada',             institution: 'INRAPE', specialty: 'Aliments, Réactivité et Synthèse des Substances Naturelles' },
-  { id: '14', name: 'Dr Chakira Hamada',            institution: 'UDC', faculty: 'FST', specialty: 'Entomologie, Neurosciences et Santé' },
-]

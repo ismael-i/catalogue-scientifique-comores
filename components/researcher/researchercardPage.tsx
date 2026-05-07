@@ -1,5 +1,6 @@
 import { Users, Building2 } from 'lucide-react'
 import type { Chercheur, ViewMode } from '@/types'
+import Link from 'next/link';
 
 interface ChercheurCardProps {
   chercheur: Chercheur
@@ -28,6 +29,7 @@ function GridCard({ chercheur }: { chercheur: Chercheur }) {
   const { name, institution, faculty, specialty, photoUrl } = chercheur
 
   return (
+     <Link href={`chercheurs/${chercheur.id}`} className="block">
     <div className="group bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
       {/* Avatar */}
       <div className="w-12 h-12 flex-shrink-0">
@@ -50,6 +52,7 @@ function GridCard({ chercheur }: { chercheur: Chercheur }) {
         {specialty}
       </p>
     </div>
+    </Link>
   )
 }
 
@@ -58,6 +61,7 @@ function ListCard({ chercheur }: { chercheur: Chercheur }) {
   const { name, institution, faculty, photoUrl } = chercheur
 
   return (
+     <Link href={`chercheurs/${chercheur.id}`} className="block">
     <div className="group bg-white border border-slate-200 rounded-xl px-5 py-4 flex items-center gap-4 hover:shadow-sm hover:border-blue-200 transition-all duration-200 cursor-pointer">
       {/* Avatar */}
       <div className="w-10 h-10 flex-shrink-0">
@@ -75,6 +79,7 @@ function ListCard({ chercheur }: { chercheur: Chercheur }) {
         </div>
       </div>
     </div>
+    </Link>
   )
 }
 

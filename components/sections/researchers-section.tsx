@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 import { ArrowRight } from 'lucide-react'
-import { ResearcherCard } from '../cards/researcher-card'
+import { ResearcherCard } from '../researcher/researcher-card'
 
 const researchers = [
   {

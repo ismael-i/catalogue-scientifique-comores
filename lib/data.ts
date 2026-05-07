@@ -1,5 +1,7 @@
 import type { Laboratoire, Institution } from "../types";
+import type { Chercheur, ChercheurCard } from '../types'
 
+import type { LaboratoireDetail } from '../types'
 // ── Laboratoires ────────────────────────────────────────────────────
 
 export const labos: Laboratoire[] = [
@@ -51,3 +53,201 @@ export const institutions: Institution[] = [
       "Centre de recherche pluridisciplinaire couvrant la sismologie, la volcanologie, le patrimoine, les risques naturels et les sciences sociales.",
   },
 ];
+
+
+
+export const MOCK_CHERCHEURS: Chercheur[] = [
+  {
+    id: 'nadjim-ahmed-mohamed',
+    name: 'Dr Nadjim Ahmed Mohamed',
+    photoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    laboratoireId: 'lsml',
+    laboratoire: 'Laboratoire des Sciences Marines et Littorales (LSML)',
+    effectif: 5,
+    specialty: 'Écosystème et Biodiversité marine, pollution marine et côtière',
+    publications:
+      'Mahamoud, A., Maher, G., Mohamed, N.A. et al. (2023) Monitoring shoreline change using remote sensing, GIS, and field surveys: a case study of the Ngazidja Island Coast, Comoros. Arab J Geosci 16, 114',
+    partenariats:
+      'Nekton Première Descente: Expédition Comores, Projet COEXISTENCE, Projet Mermoz, Projet Hifadhi Blu',
+    email: 'ahmed.nadjim@fst-udc.org',
+    phone: '+269-341 62 48',
+  },
+  {
+    id: 'andiliyat-said-mohamed',
+    name: 'Dr Andiliyat Said Mohamed',
+    photoUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    laboratoireId: 'hnc',
+    laboratoire: 'Herbier National des Comores (HNC)',
+    specialty: 'Biodiversité, botanique, géomatique',
+    publications: 'Oui (colloques, bases de données)',
+    partenariats: 'LR2SN, LEFE',
+    note: 'Manque de locaux et équipements',
+  },
+  {
+    id: 'said-hassani-mohamed',
+    name: 'Dr Said Hassani Mohamed',
+    photoUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    laboratoireId: 'biosan',
+    laboratoire: 'Laboratoire Biologie et Santé (BioSan)',
+    effectif: 12,
+    specialty: 'Biologie et Santé',
+    email: 'mohamed.saidhassani@univ-comores.com',
+    phone: '3330787',
+    note: 'Équipements et réactifs insuffisants',
+  },
+  {
+    id: 'malik-elhouyoun-ahamada',
+    name: 'Dr Malik El-Houyoun Ahamada',
+    photoUrl: 'https://randomuser.me/api/portraits/men/46.jpg',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    laboratoireId: 'lema',
+    laboratoire: "Laboratoire d'Énergétique et Mécanique Appliquée (LEMA)",
+    effectif: 6,
+    specialty: 'Énergétique et mécanique appliquée',
+    partenariats:
+      "IME (Université d'Antananarivo), Department of Chemical and Environmental Engineering, University of Mauritius",
+    email: 'elhouyoun@gmail.com',
+    phone: '3634730 / 483 30 62',
+    note: 'Manque de locaux et équipements, manque de financements',
+  },
+  {
+    id: 'salim-ahmed',
+    name: 'Dr Salim Ahmed',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    laboratoireId: 'lapec',
+    laboratoire: "Laboratoire de Physique de l'Environnement et du Climat (LaPEC)",
+    specialty: "Physique de l'environnement et du climat",
+    phone: '3227652',
+  },
+  {
+    id: 'halassi-abdoulhafar',
+    name: 'Dr Halassi Abdoulhafar',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    laboratoireId: 'lmsia',
+    laboratoire: 'Laboratoire Mathématique Statistique Informatique et Application (LMSIA)',
+    effectif: 32,
+    specialty: 'Mathématiques, Informatique et IA',
+    partenariats:
+      'Université de Lille, Toulon, Sorbonne Paris Nord, Hassan II Casablanca, Poitiers',
+    email: 'halassi.abdoul@gmail.com',
+    phone: '3350176',
+  },
+  {
+    id: 'azali-ahamada',
+    name: 'Dr Azali Ahamada',
+    photoUrl: 'https://randomuser.me/api/portraits/men/47.jpg',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    specialty: 'Aliments, Réactivité et Synthèse des Substances Naturelles',
+  },
+  {
+    id: 'ibrahim-said-ali',
+    name: 'Dr Ibrahim Said Ali',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    specialty: 'Valorisation des ressources alimentaires locales',
+  },
+  {
+    id: 'rastami-ahamadi',
+    name: 'Rastami Ahamadi',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    specialty: 'Inventaires des plantes médicinales et aromatiques',
+  },
+  {
+    id: 'allaoui-ahamadi',
+    name: 'Allaoui Ahamadi',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    specialty: 'Santé des plantes et animaux',
+  },
+  {
+    id: 'anli-mohamed',
+    name: 'Dr Anli Mohamed',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    specialty: 'Valorisation et transformation des déchets',
+  },
+  {
+    id: 'mohamed-abdou',
+    name: 'Dr Mohamed Abdou',
+    institutionId: 'bgc',
+    institution: 'BGC',
+    specialty: 'Gestion et exploitation des ressources géologiques',
+  },
+  {
+    id: 'azali-ahamada-inrape',
+    name: 'Dr Azali Ahamada',
+    institutionId: 'inrape',
+    institution: 'INRAPE',
+    specialty: 'Aliments, Réactivité et Synthèse des Substances Naturelles',
+  },
+  {
+    id: 'chakira-hamada',
+    name: 'Dr Chakira Hamada',
+    institutionId: 'udc',
+    institution: 'UDC',
+    faculty: 'FST',
+    specialty: 'Entomologie, Neurosciences et Santé',
+  },
+]
+
+export const MOCK_RELATED: ChercheurCard[] = MOCK_CHERCHEURS
+  .filter((c) => c.institution === 'UDC' && c.id !== MOCK_CHERCHEURS[0].id)
+  .slice(0, 3)
+  .map(({ id, name, photoUrl, institution, faculty, specialty }) => ({
+    id, name, photoUrl, institution, faculty, specialty,
+  }))
+
+
+
+  export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
+  { id: 'lsml',     acronym: 'LSML',     name: 'Laboratoire des Sciences Marines et Littorales',                              description: "Le LSML est dédié à l'étude des écosystèmes marins et littoraux de l'archipel des Comores. Il mène des recherches sur la biodiversité marine, la pollution côtière et la gestion durable des ressources.", categorie: 'Environnement', researchers: 5,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'hnc',      acronym: 'HNC',      name: 'Herbier National des Comores',                                                description: "L'Herbier national des Comores est consacré à l'inventaire et à la conservation de la flore comorienne. Il associe botanique, géomatique et bases de données pour documenter la biodiversité.", categorie: 'Sciences',      researchers: 3,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'biosan',   acronym: 'BioSan',   name: 'Laboratoire Biologie et Santé',                                               description: 'Le Laboratoire BioSan mène des recherches en biologie et santé, couvrant la microbiologie, la biochimie et la santé publique.',                                                                        categorie: 'Santé',         researchers: 12, institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lema',     acronym: 'LEMA',     name: "Laboratoire d'Énergétique et Mécanique Appliquée",                            description: "Le LEMA se consacre à la recherche en énergétique et mécanique appliquée, en collaboration avec des universités internationales.",                                                                   categorie: 'Sciences',      researchers: 6,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lapec',    acronym: 'LaPEC',    name: "Laboratoire de Physique de l'Environnement et du Climat",                     description: "Le LaPEC mène des recherches sur la physique de l'environnement et les sciences du climat dans le contexte insulaire des Comores.",                                                                   categorie: 'Sciences',      researchers: 4,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lmsia',    acronym: 'LMSIA',    name: 'Laboratoire Mathématique Statistique Informatique et Application',             description: "Le LMSIA regroupe des chercheurs en mathématiques, statistique, informatique et intelligence artificielle des Comores.",                                                                              categorie: 'Sciences',      researchers: 32, institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lar2sn',   acronym: 'LAR2SN',   name: 'Laboratoire Aliments, Réactivité et Synthèse des Substances Naturelles',      description: "Le LAR2SN se consacre à la recherche sur les substances naturelles, la réactivité chimique et la valorisation des ressources alimentaires locales.",                                                  categorie: 'Sciences',      researchers: 11, institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'larre-b',  acronym: 'LARRE-B',  name: 'Laboratoire de Recherche sur les Ressources Environnementales et le Bien-Être',description: "Le LARRE-B mène des recherches sur la valorisation des ressources environnementales et les solutions locales pour le bien-être des populations comoriennes.",                                      categorie: 'Sciences',      researchers: 5,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'psn',      acronym: 'PSN',      name: 'Phytochimie des Sciences Naturelles',                                          description: "Ce laboratoire se consacre à l'inventaire et à l'étude phytochimique des plantes médicinales et aromatiques des Comores.",                                                                          categorie: 'Sciences',      researchers: 10, institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'epp',      acronym: 'EPP',      name: 'Entomo-Phyto-Pathologie',                                                      description: "Laboratoire dédié à l'étude des maladies des plantes et des animaux, à l'entomologie et à la phytopathologie.",                                                                                  categorie: 'Sciences',      researchers: 5,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'gavd',     acronym: 'GAVD',     name: 'Gestion Agricole et Valorisation des Déchets',                                 description: "Recherche sur la gestion agricole durable et la valorisation des déchets organiques et agricoles.",                                                                                                categorie: 'Sciences',      researchers: 6,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'gvetm',    acronym: 'GVETM',    name: 'Gestion et Valorisation des Écosystèmes Terrestres et Marins',                 description: "Recherche sur la gestion durable et la valorisation des écosystèmes terrestres et marins des Comores.",                                                                                           categorie: 'Environnement', researchers: 5,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'dej-sif',  acronym: 'DEJ-SIF',  name: 'Dynamiques Économiques et Juridiques des Secteurs Informels et Formels',       description: "Production d'études et de données scientifiques sur les dynamiques économiques et juridiques des secteurs informels et formels aux Comores.",                                                      categorie: 'Économie',      researchers: 8,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'fcl',      acronym: 'FCL',      name: 'FLE et Création Littéraire',                                                   description: "Recherche sur le français langue étrangère, la didactique des langues et la création littéraire comorienne.",                                                                                      categorie: 'Lettres',       researchers: 9,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'emsp-lab', acronym: 'EMSP-Lab', name: "Laboratoire en Création à l'EMSP",                                             description: "Laboratoire en cours de création au sein de l'École de Médecine et de Santé Publique de l'Université des Comores.",                                                                               categorie: 'Santé',         researchers: 5,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lvm',      acronym: 'LVM',      name: 'Laboratoire Vivants de Mohéli',                                                description: "Laboratoire dédié à l'étude des organismes vivants et de la biodiversité de l'île de Mohéli.",                                                                                                  categorie: 'Sciences',      researchers: 3,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'larjes',   acronym: 'LARJES',   name: 'Laboratoire de Recherche Juridiques Économiques et Sociales',                  description: "Recherche pluridisciplinaire en droit, économie et sciences sociales appliquée au contexte comorien.",                                                                                            categorie: 'Économie',      researchers: 3,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lage',     acronym: 'LaGE',     name: 'Laboratoire de Géosciences et Environnement',                                  description: "Le LaGE mène des recherches en géosciences et environnement, incluant la géologie, l'hydrologie et les risques naturels.",                                                                        categorie: 'Environnement', researchers: 11, institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'leens',    acronym: 'LEENS',    name: 'Laboratoire Entomologie Neurosciences et Santé',                               description: "Le LEENS mène des recherches à l'intersection de l'entomologie, des neurosciences et de la santé publique.",                                                                                       categorie: 'Santé',         researchers: 7,  institution: 'Université des Comores', institutionId: 'udc' },
+  { id: 'lefe',     acronym: 'LEFE',     name: "Laboratoire d'Écologie Fonctionnelle et Environnement",                        description: "Le LEFE de l'INRAPE mène des recherches en écologie fonctionnelle, contrôle qualité, agro-pédologie et culture in vitro.",                                                                        categorie: 'Environnement', researchers: 7,  institution: 'INRAPE',                 institutionId: 'inrape' },
+  { id: 'lsaz',     acronym: 'LSAZ',     name: 'Laboratoire Santé Animale et Zoonoses',                                        description: "Recherche sur la santé animale, les zoonoses et la production animale aux Comores.",                                                                                                            categorie: 'Santé',         researchers: 2,  institution: 'INRAPE',                 institutionId: 'inrape' },
+  { id: 'lcqrv',    acronym: 'LCQRV',    name: 'Laboratoire Contrôle Qualité, Recherche et Vulgarisation',                     description: "Laboratoire dédié au contrôle qualité, à la recherche et à la vulgarisation scientifique.",                                                                                                    categorie: 'Sciences',      researchers: 2,  institution: 'INRAPE',                 institutionId: 'inrape' },
+  { id: 'lep',      acronym: 'LEP',      name: 'Laboratoire Entomologie et Phytopathologie',                                   description: "Recherche en entomologie et phytopathologie appliquée à l'agriculture comorienne.",                                                                                                             categorie: 'Sciences',      researchers: 2,  institution: 'INRAPE',                 institutionId: 'inrape' },
+  { id: 'lorh',     acronym: 'LORH',     name: 'Laboratoire de Recherche Océanographique et Ressources Halieutiques',          description: "Recherche océanographique et étude des ressources halieutiques des eaux comoriennes.",                                                                                                        categorie: 'Environnement', researchers: 2,  institution: 'INRAPE',                 institutionId: 'inrape' },
+  { id: 'lrcn',     acronym: 'LRCN',     name: 'Laboratoire Risques et Catastrophes Naturelles',                               description: "Recherche sur la volcanologie, la sismologie et les risques naturels de l'archipel des Comores.",                                                                                               categorie: 'Sciences',      researchers: 4,  institution: 'CNDRS',                  institutionId: 'cndrs' },
+  { id: 'ura',      acronym: 'URA',      name: 'Unité de Recherche en Anthropologie',                                          description: "Recherche anthropologique sur la société comorienne, le patrimoine culturel et les dynamiques de changement.",                                                                                  categorie: 'Lettres',       researchers: 4,  institution: 'CNDRS',                  institutionId: 'cndrs' },
+  { id: 'lntpb',    acronym: 'LNTPB',    name: 'Laboratoire National de Travaux Publics et Bâtiment',                          description: "Recherche sur les matériaux locaux, la géotechnique et la construction adaptée au contexte comorien.",                                                                                        categorie: 'Sciences',      researchers: 2,  institution: 'LNTPB-EPIC',             institutionId: 'lntpb' },
+  { id: 'bgc',      acronym: 'BGC',      name: 'Bureau Géologique des Comores',                                                description: "Le BGC mène des études géophysiques, géologiques et géochimiques, avec un focus sur la géothermie et les ressources en eau de l'archipel.",                                                      categorie: 'Sciences',      researchers: 54, institution: 'Bureau Géologique des Comores', institutionId: 'bgc' },
+]
