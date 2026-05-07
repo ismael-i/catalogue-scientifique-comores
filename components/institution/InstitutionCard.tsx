@@ -19,7 +19,7 @@ export function InstitutionCard({
             <InstIcon className="w-6 h-6 text-slate-400" />
           )}
         </div>
-        <span className="text-xs text-green-800 letter-spacing px-2 py-0.5 tracking-tight uppercase">
+        <span className="text-xs text-green-600 bg-gray-100 rounded-full letter-spacing px-2 py-0.5 tracking-tight uppercase">
           {acronym}
         </span>
       </div>

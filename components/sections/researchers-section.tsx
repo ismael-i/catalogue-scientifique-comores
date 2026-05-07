@@ -58,7 +58,7 @@ export function ResearchersSection() {
               Découvrez les profils mis en avant dans le catalogue
             </p>
           </div>
-          <Link href="#" className="text-blue-500 hover:text-blue-600 text-sm font-semibold flex items-center gap-1">
+          <Link href="/chercheurs" className="text-blue-500 hover:text-blue-600 text-sm font-semibold flex items-center gap-1">
             Voir tous
             <ArrowRight size={16} />
           </Link>

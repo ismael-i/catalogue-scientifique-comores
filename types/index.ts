@@ -26,3 +26,14 @@ export interface SectionProps {
 export interface LabCardProps extends Laboratoire {}
 
 export interface InstitutionCardProps extends Institution {}
+
+export interface Chercheur {
+  id: string          // identifiant unique (ex: slug ou uuid)
+  name: string        // nom complet (ex: "Dr Nadjim Ahmed Mohamed")
+  institution: string // acronyme institution (ex: "UDC", "BGC", "INRAPE")
+  faculty?: string    // faculté optionnelle (ex: "FST")
+  specialty: string   // domaine de recherche
+  photoUrl?: string   // URL photo de profil, optionnelle (fallback icône)
+}
+
+export type ViewMode = 'grid' | 'list'  // toggle grille / liste
