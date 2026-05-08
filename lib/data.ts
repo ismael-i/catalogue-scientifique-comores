@@ -130,7 +130,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'malik-elhouyoun-ahamada',
     name: 'Dr Malik El-Houyoun Ahamada',
-    photoUrl: 'https://randomuser.me/api/portraits/men/46.jpg',
+    photoUrl: 'chercheurs/Dr Halassi Abdoulhafar.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
@@ -158,6 +158,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'halassi-abdoulhafar',
     name: 'Dr Halassi Abdoulhafar',
+    photoUrl : 'chercheurs/Dr Halassi Abdoulhafar.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
