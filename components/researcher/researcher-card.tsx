@@ -1,24 +1,25 @@
 'use client'
 
 import { Users } from 'lucide-react'
+import type { Chercheur, ViewMode } from '@/types'
+import Link from 'next/link'
 
-interface ResearcherCardProps {
-  id: string
-  name: string
-  affiliation: string
-  specialty: string
-  avatar?: string
+interface ChercheurCardProps {
+  chercheur: Chercheur
+
 }
 
-export function ResearcherCard({ name, affiliation, specialty, avatar }: ResearcherCardProps) {
+export function ResearcherCard({ chercheur }: { chercheur: Chercheur }){
+    const { name, institution, faculty, specialty, photoUrl } = chercheur
   return (
+    <Link href={`chercheurs/${chercheur.id}`} className="block">
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          {avatar ? (
+          {photoUrl? (
             <img 
-              src={avatar} 
+              src={photoUrl}
               alt={name}
               className="w-12 h-12 rounded-full object-cover"
             />
@@ -35,7 +36,7 @@ export function ResearcherCard({ name, affiliation, specialty, avatar }: Researc
             {name}
           </h3>
           <p className="text-xs text-gray-600 mt-1">
-            {affiliation}
+            <span>{institution}{faculty ? ` / ${faculty}` : ''}</span>
           </p>
           <p className="text-xs text-gray-700 mt-2 line-clamp-2">
             {specialty}
@@ -43,5 +44,6 @@ export function ResearcherCard({ name, affiliation, specialty, avatar }: Researc
         </div>
       </div>
     </div>
+    </Link>
   )
 }

@@ -83,7 +83,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'nadjim-ahmed-mohamed',
     name: 'Dr Nadjim Ahmed Mohamed',
-    photoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    photoUrl: '/chercheurs/DR NADJIM.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
@@ -101,7 +101,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'andiliyat-said-mohamed',
     name: 'Dr Andiliyat Said Mohamed',
-    photoUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+    photoUrl: '/chercheurs/Dr Andiliyat Said Mohamed.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
@@ -115,7 +115,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'said-hassani-mohamed',
     name: 'Dr Said Hassani Mohamed',
-    photoUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
+    photoUrl: '/chercheurs/Dr Said Hassani Mohamed.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
@@ -294,7 +294,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
        {
     id: 'nadjim-ahmed-mohamed',
     name: 'Dr Nadjim Ahmed Mohamed',
-    photoUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    photoUrl: 'DR NADJIM.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',

@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 import { ArrowRight } from 'lucide-react'
 import { ResearcherCard } from '../researcher/researcher-card'
+import {MOCK_CHERCHEURS} from "@/lib/data";
 
 const researchers = [
   {
@@ -45,6 +46,7 @@ const researchers = [
 ]
 
 export function ResearchersSection() {
+  
   return (
     <section className="w-full bg-gray-50 py-16 border-t border-gray-200">
       <div className="max-w-6xl mx-auto px-6">
@@ -66,12 +68,13 @@ export function ResearchersSection() {
 
         {/* Researchers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {researchers.map((researcher) => (
-            <ResearcherCard
-              key={researcher.id}
-              {...researcher}
-            />
-          ))}
+          {MOCK_CHERCHEURS.slice(0, 6).
+            map((researcher) => (
+              <ResearcherCard
+                key={researcher.id}
+                chercheur={researcher}
+              />
+            ))}
         </div>
       </div>
     </section>
