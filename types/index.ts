@@ -92,14 +92,23 @@ export type LabCategorie =
 
 // ── Modèle complet — table `laboratoires` en DB ──────────────────────
 export interface LaboratoireDetail {
-  id: string            // PK — slug (ex: "lsml", "biosan")
-  acronym: string       // ex: "LSML", "BioSan"
-  name: string          // nom complet
-  description: string   // texte affiché dans la card
-  categorie: LabCategorie
-  researchers: number   // nb de chercheurs du labo
-  institution: string   // nom affiché (ex: "Université des Comores")
-  institutionId: string // FK → table institutions
+  id: string;
+  acronym: string;
+  name: string;
+  description: string;
+  categorie: string;
+  researchers: number;
+  institution: string;
+  institutionId: string;
+  thematiques?: string[];
+  responsable?: Chercheur;
+  publications?: Publication[];
+  partenariats?: string[];
+  contact?: {
+    email?: string;
+    telephone?: string;
+    site?: string;
+  }
 }
 
 // ── Publications ────────────────────────────────────────────────────
