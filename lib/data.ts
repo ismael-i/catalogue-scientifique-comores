@@ -407,6 +407,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Biologie et Santé"],
+     logo : '/labicon/BIOSAN.svg',
     responsable:  {
     id: 'said-hassani-mohamed',
     name: 'Dr Said Hassani Mohamed',
@@ -421,6 +422,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     email: 'mohamed.saidhassani@univ-comores.com',
     phone: '3330787',
     note: 'Équipements et réactifs insuffisants',
+    
   },
   },
   {
