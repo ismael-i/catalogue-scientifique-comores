@@ -15,6 +15,7 @@ export interface Laboratoire {
   institution: string;          // institution display name
   institutionAcronym?: string;  // institution acronym (used for filtering)
   domain?: LabDomain;           // domain badge displayed on institution detail
+  logo?: string;               // URL optionnelle du logo
 }
 
 export interface Institution {
@@ -104,6 +105,7 @@ export interface LaboratoireDetail {
   responsable?: Chercheur;
   publications?: Publication[];
   partenariats?: string[];
+  logo?: string;
   contact?: {
     email?: string;
     telephone?: string;

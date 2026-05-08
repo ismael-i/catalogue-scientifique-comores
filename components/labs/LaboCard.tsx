@@ -16,7 +16,7 @@ interface LaboCardProps {
 }
 
 export function LaboCard({ labo }: LaboCardProps) {
-  const { id, acronym, name, description, categorie, researchers, institution } = labo
+  const { id, acronym, name, description, categorie, researchers, institution  ,logo} = labo
 
   return (
     <Link href={`/laboratoires/${id}`}>
@@ -25,7 +25,11 @@ export function LaboCard({ labo }: LaboCardProps) {
         {/* En-tête */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-blue-500">
-            <FlaskConical className="w-4 h-4 flex-shrink-0" strokeWidth={1.8} />
+              {logo ? (
+                                  <img src={logo} alt={acronym} className="w-10 h-10 object-contain" />
+                                ) : (
+                                   <FlaskConical className="w-4 h-4 flex-shrink-0" strokeWidth={1.8} />
+                                )}
             <span className="text-xs font-bold tracking-wide uppercase">{acronym}</span>
           </div>
           <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${BADGE_COLORS[categorie]}`}>

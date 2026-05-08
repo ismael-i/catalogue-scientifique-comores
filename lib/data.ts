@@ -732,6 +732,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "CNDRS",
     institutionId: "cndrs",
     thematiques: ["Volcanologie", "Sismologie", "Risques naturels"],
+     logo : '/labicon/icones 14 labos-02.svg'
   },
   {
     id: "ura",
@@ -744,6 +745,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "CNDRS",
     institutionId: "cndrs",
     thematiques: ["Anthropologie", "Patrimoine culturel"],
+    logo : '/labicon/icones 14 labos_Plan de travail 1.svg'
   },
   {
     id: "lntpb",

@@ -8,12 +8,17 @@ export function LabCard({
   description,
   researchers,
   institution,
+  logo,
 }: LabCardProps) {
   return (
     <div className="group bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer min-w-0">
       {/* Acronyme */}
       <div className="flex items-center gap-2 text-blue-500">
-        <LabIcon className="w-4 h-4 shrink-0" />
+         {logo ? (
+                    <img src={logo} alt={acronym} className="w-10 h-10 object-contain" />
+                  ) : (
+                    <LabIcon className="w-4 h-4 shrink-0" />
+                  )}
         <span className="text-xs font-semibold tracking-wide uppercase">
           {acronym}
         </span>
