@@ -289,6 +289,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Écosystème et Biodiversité marine", "Pollution marine et côtière"],
+    logo : '/labicon/LSML.svg',
     responsable: 
        {
     id: 'nadjim-ahmed-mohamed',
@@ -385,6 +386,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Biodiversité", "Botanique", "Géomatique"],
+    logo : '/labicon/HNC.svg',
     responsable: {
     id: 'andiliyat-said-mohamed',
     name: 'Dr Andiliyat Said Mohamed',
@@ -441,6 +443,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Énergétique et mécanique appliquée"],
+    logo : '/labicon/LEMA.svg',
     responsable:  {
     id: 'malik-elhouyoun-ahamada',
     name: 'Dr Malik El-Houyoun Ahamada',
@@ -494,6 +497,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Mathématiques", "Informatique et IA"],
+    logo : '/labicon/LMSIA.svg',
     responsable:  {
     id: 'halassi-abdoulhafar',
     name: 'Dr Halassi Abdoulhafar',
@@ -522,6 +526,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Substances naturelles", "Réactivité chimique", "Valorisation alimentaire"],
+    logo : '/labicon/LAR2SN.svg',
     partenariats: ["Université de La Réunion"],
   },
   {
@@ -571,6 +576,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Gestion agricole", "Valorisation des déchets"],
+    logo : '/labicon/GAVD.svg'
   },
   {
     id: "gvetm",
@@ -643,6 +649,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Droit", "Économie", "Sciences sociales"],
+    logo : '/labicon/LARJES.svg'
   },
   {
     id: "lage",
@@ -667,6 +674,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Université des Comores",
     institutionId: "udc",
     thematiques: ["Entomologie", "Neurosciences", "Santé publique"],
+    logo : '/labicon/LEENS.svg'
   },
   {
     id: "lefe",
@@ -703,6 +711,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "INRAPE",
     institutionId: "inrape",
     thematiques: ["Contrôle qualité", "Vulgarisation scientifique"],
+    logo : '/labicon/LCQRV.svg'
   },
   {
     id: "lep",
@@ -739,7 +748,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "CNDRS",
     institutionId: "cndrs",
     thematiques: ["Volcanologie", "Sismologie", "Risques naturels"],
-     logo : '/labicon/icones 14 labos-02.svg'
+     logo : '/labicon/LRCN.svg'
   },
   {
     id: "ura",
@@ -752,7 +761,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "CNDRS",
     institutionId: "cndrs",
     thematiques: ["Anthropologie", "Patrimoine culturel"],
-    logo : '/labicon/icones 14 labos_Plan de travail 1.svg'
+    logo : '/labicon/URA.svg'
   },
   {
     id: "lntpb",
@@ -765,6 +774,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "LNTPB-EPIC",
     institutionId: "lntpb",
     thematiques: ["Matériaux locaux", "Géotechnique", "Construction"],
+    logo : '/labicon/LNTPB.svg'
   },
   {
     id: "bgc",
@@ -777,6 +787,7 @@ export const MOCK_LABORATOIRES: LaboratoireDetail[] = [
     institution: "Bureau Géologique des Comores",
     institutionId: "bgc",
     thematiques: ["Géophysique", "Géologie", "Géochimie", "Géothermie"],
+    logo : '/labicon/BGC.svg'
   },
 ];
 export const getInstitutionByAcronym = (acronym: string): Institution | undefined =>

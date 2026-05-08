@@ -32,6 +32,7 @@ export interface SectionProps {
   viewAllLabel?: string;
   cols?: 2 | 3 | 4;
   children: React.ReactNode;
+  link?: string; // URL de la page "Voir tous"
 }
 
 export interface LabCardProps extends Laboratoire {}

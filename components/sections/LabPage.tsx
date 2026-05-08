@@ -1,4 +1,4 @@
-import { institutions, labos } from "@/lib/data";
+import { institutions,MOCK_LABORATOIRES } from "@/lib/data";
 import { Section } from "./Section";
 import { LabCard } from "../labs/LabCard";
 import { InstitutionCard } from "../institution/InstitutionCard";
@@ -13,10 +13,11 @@ export default function LabPage() {
           title="Laboratoires de recherche"
           subtitle="Les unités de recherche actives aux Comores"
           viewAllLabel="Voir tous →"
+          link="/laboratoires"
           cols={3}
         >
-         {labos.slice(0, 6).map((labo) => (
-            <LabCard key={labo.acronym} {...labo} />
+         {MOCK_LABORATOIRES.slice(0, 6).map((labo) => (
+            <LabCard key={labo.id} labo={labo} />
           ))}
         </Section>
 
@@ -25,6 +26,7 @@ export default function LabPage() {
           title="Institutions"
           subtitle="Les institutions scientifiques des Comores"
           viewAllLabel="Voir toutes →"
+          link="/institutions"
           cols={3}
         >
           {institutions && institutions.slice(0, 3).map((inst) => (

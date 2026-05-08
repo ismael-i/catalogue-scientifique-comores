@@ -1,4 +1,5 @@
 import { SectionProps } from "@/types";
+import Link from "next/link";
 
 
 // Map cols → classe Tailwind (évite les purges de classes dynamiques)
@@ -12,6 +13,7 @@ export function Section({
   title,
   subtitle,
   viewAllLabel = "Voir tous →",
+  link = "#",
   cols = 3,
   children,
 }: SectionProps) {
@@ -23,9 +25,9 @@ export function Section({
           <h2 className="text-3xl font-bold text-slate-800">{title}</h2>
           <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
         </div>
-        <button className="text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors whitespace-nowrap">
+        <Link href={link} className="text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors whitespace-nowrap">
           {viewAllLabel}
-        </button>
+        </Link>
       </div>
 
       {/* Grille */}

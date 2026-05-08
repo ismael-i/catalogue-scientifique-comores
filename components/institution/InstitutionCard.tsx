@@ -1,5 +1,6 @@
 import { InstitutionCardProps } from "@/types";
 import { InstIcon } from "../icons";
+import Link from "next/link";
 
 
 export function InstitutionCard({
@@ -7,8 +8,13 @@ export function InstitutionCard({
   name,
   description,
   logo,
+  
 }: InstitutionCardProps) {
+   const slug = acronym.toLowerCase()
   return (
+      <Link
+      href={`/institutions/${slug}`}
+    >
     <div className="group bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer min-w-0">
       {/* En-tête : logo + badge acronyme */}
       <div className="flex items-start justify-between gap-2">
@@ -34,5 +40,6 @@ export function InstitutionCard({
         {description}
       </p>
     </div>
+    </Link>
   );
 }

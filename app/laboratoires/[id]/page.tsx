@@ -90,7 +90,11 @@ const LaboratoireDetailPage = () => {
           <div className="max-w-6xl mx-auto px-6 pt-10 pb-10">
             <div className="flex items-start gap-4 mb-5">
               <div className="w-14 h-14 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
-                <FlaskConical className="w-7 h-7 text-blue-400" />
+                 {lab.logo ? (
+                                  <img src={lab.logo} alt={lab.acronym} className="w-30 h-30 object-contain" />
+                                ) : (
+                                   <FlaskConical className="w-4 h-4 flex-shrink-0" strokeWidth={1.8} />
+                                )}
               </div>
               <div className="min-w-0 pt-1">
                 <div className="flex flex-wrap items-center gap-3 mb-1">

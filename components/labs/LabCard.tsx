@@ -1,16 +1,15 @@
-import { LabCardProps } from "@/types";
+import { LabCardProps, LaboratoireCard } from "@/types";
 import { LabIcon } from "../icons";
+import Link from "next/link";
+interface LaboCardProps {
+  labo: LaboratoireCard
+}
 
 
-export function LabCard({
-  acronym,
-  name,
-  description,
-  researchers,
-  institution,
-  logo,
-}: LabCardProps) {
+export function LabCard({ labo }: LaboCardProps) {
+   const { id, acronym, name, description, categorie, researchers, institution  ,logo} = labo
   return (
+     <Link href={`/laboratoires/${id}`}>
     <div className="group bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer min-w-0">
       {/* Acronyme */}
       <div className="flex items-center gap-2 text-blue-500">
@@ -41,5 +40,6 @@ export function LabCard({
         <span>{institution}</span>
       </div>
     </div>
+    </Link>
   );
 }
