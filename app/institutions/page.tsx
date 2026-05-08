@@ -152,7 +152,7 @@ interface InstitutionGridCardProps {
 }
 
 const InstitutionGridCard = ({ institution }: InstitutionGridCardProps) => {
-  const { acronym, name, description, logoBg } = institution
+  const { acronym, name, description, logo, logoBg } = institution
   const researchers = getChercheursByInstitution(acronym).length
   const slug = acronym.toLowerCase()
 
@@ -163,11 +163,20 @@ const InstitutionGridCard = ({ institution }: InstitutionGridCardProps) => {
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+          className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden ${
             logoBg ?? 'bg-slate-50'
           }`}
         >
-          <InstIcon className="w-6 h-6 text-slate-400" />
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logo}
+              alt={`Logo ${acronym}`}
+              className="w-full h-full object-contain p-1"
+            />
+          ) : (
+            <InstIcon className="w-6 h-6 text-slate-400" />
+          )}
         </div>
         <span className="text-xs font-semibold text-emerald-700 tracking-wide">
           {acronym}

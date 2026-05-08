@@ -119,11 +119,20 @@ const InstitutionDetailPage = () => {
           <div className="max-w-6xl mx-auto px-6 pt-10 pb-10">
             <div className="flex items-center gap-4 mb-5">
               <div
-                className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden ${
                   institution.logoBg ?? 'bg-slate-100'
                 }`}
               >
-                <InstIcon className="w-7 h-7 text-slate-400" />
+                {institution.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={institution.logo}
+                    alt={`Logo ${institution.acronym}`}
+                    className="w-full h-full object-contain p-1"
+                  />
+                ) : (
+                  <InstIcon className="w-7 h-7 text-slate-400" />
+                )}
               </div>
               <span className="text-xl font-bold text-blue-500 tracking-wide">
                 {institution.acronym}
