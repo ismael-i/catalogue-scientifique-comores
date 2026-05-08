@@ -86,6 +86,23 @@ export function Footer() {
               <li>
                 <span className="text-gray-400">Moroni, Union des Comores</span>
               </li>
+              <li>
+                {/* Soutien Ambassade de France */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="text-right">
+              <p className="text-xs font-semibold text-white leading-tight">Avec le soutien de</p>
+              <p className="text-xs text-white">l&apos;Ambassade de France</p>
+            </div>
+            <div className="w-30 h-30 sm:w-30 sm:h-30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="Amb-Union-des-Comores white.png"
+                alt="Ambassade de France"
+                className="w-full h-full object-contain p-1"
+              />
+            </div>
+          </div>
+              </li>
             </ul>
           </div>
         </div>

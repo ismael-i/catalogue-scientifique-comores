@@ -52,30 +52,6 @@ export function Hero() {
               </div>
             ))}
           </div>
-
-          {/* Soutien Ambassade de France */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="text-right">
-              <p className="text-xs font-semibold text-gray-900 leading-tight">Avec le soutien de</p>
-              <p className="text-xs text-gray-600">l&apos;Ambassade de France</p>
-            </div>
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logos/ambassade-france.png"
-                alt="Ambassade de France"
-                className="w-full h-full object-contain p-1"
-                onError={(e) => {
-                  const t = e.currentTarget
-                  t.style.display = 'none'
-                  if (t.parentElement) {
-                    t.parentElement.innerHTML =
-                      `<span class="text-blue-700 text-[10px] font-bold text-center px-1">🇫🇷</span>`
-                  }
-                }}
-              />
-            </div>
-          </div>
         </div>
 
         {/* ── Titre + CTA ───────────────────────────────────────────── */}
