@@ -40,6 +40,7 @@ export const institutions: Institution[] = [
     name: 'Université des Comores',
     description:
       "Fondée en 2003, l'UDC est l'université publique principale de l'Union des Comores. Elle est composée de plusieurs facultés, instituts et centres universitaires répartis sur les trois îles.",
+    logo: '/intitutions/udc.jpeg',
     logoBg: 'bg-blue-50',
   },
   {
@@ -47,6 +48,7 @@ export const institutions: Institution[] = [
     name: "Institut National de Recherche pour l'Agriculture, la Pêche et l'Environnement",
     description:
       "Institut national dédié à la recherche appliquée dans les domaines de l'agriculture, de la pêche et de l'environnement aux Comores.",
+    logo: '/intitutions/inrape.jpeg',
     logoBg: 'bg-green-50',
   },
   {
@@ -54,6 +56,7 @@ export const institutions: Institution[] = [
     name: 'Centre National de Documentation et de Recherche Scientifique',
     description:
       'Centre de recherche pluridisciplinaire couvrant la sismologie, la volcanologie, le patrimoine, les risques naturels et les sciences sociales.',
+    logo: '/intitutions/cndrs.jpeg',
     logoBg: 'bg-amber-50',
   },
   {
@@ -61,6 +64,7 @@ export const institutions: Institution[] = [
     name: 'Bureau Géologique des Comores',
     description:
       'Organisme spécialisé dans les études géophysiques, géologiques et géochimiques, notamment la géothermie et les ressources en eau.',
+    logo: '/intitutions/bgc.jpeg',
     logoBg: 'bg-orange-50',
   },
   {
@@ -68,6 +72,7 @@ export const institutions: Institution[] = [
     name: 'Laboratoire National de Travaux Publics et Bâtiment',
     description:
       'Établissement public à caractère industriel et commercial intervenant dans la recherche sur les matériaux locaux, la géotechnique et la construction.',
+    logo: '/intitutions/lntpb.jpeg',
     logoBg: 'bg-slate-50',
   },
 ]

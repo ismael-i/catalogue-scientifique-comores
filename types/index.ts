@@ -116,7 +116,7 @@ export interface LaboratoireDetail {
 // Sous-ensemble léger pour les listings (grille / liste de laboratoires)
 export type LaboratoireCard = Pick<
   LaboratoireDetail,
-  'id' | 'acronym' | 'name' | 'description' | 'researchers' | 'institution'
+  'id' | 'acronym' | 'name' | 'description' | 'researchers' | 'institution' | 'logo'
 > & { categorie: LabCategorie }
 
 // ── Publications ────────────────────────────────────────────────────
