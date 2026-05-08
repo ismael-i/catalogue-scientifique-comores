@@ -130,7 +130,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'malik-elhouyoun-ahamada',
     name: 'Dr Malik El-Houyoun Ahamada',
-    photoUrl: 'chercheurs/Dr Halassi Abdoulhafar.jpg',
+    photoUrl: '/chercheurs/Dr Malik El-Houyoun Ahamada.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
