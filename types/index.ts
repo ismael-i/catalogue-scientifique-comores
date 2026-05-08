@@ -97,7 +97,7 @@ export interface LaboratoireDetail {
   acronym: string;
   name: string;
   description: string;
-  categorie: string;
+  categorie: LabCategorie;
   researchers: number;
   institution: string;
   institutionId: string;
@@ -112,6 +112,12 @@ export interface LaboratoireDetail {
     site?: string;
   }
 }
+
+// Sous-ensemble léger pour les listings (grille / liste de laboratoires)
+export type LaboratoireCard = Pick<
+  LaboratoireDetail,
+  'id' | 'acronym' | 'name' | 'description' | 'researchers' | 'institution'
+> & { categorie: LabCategorie }
 
 // ── Publications ────────────────────────────────────────────────────
 
