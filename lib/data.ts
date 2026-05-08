@@ -158,7 +158,7 @@ export const MOCK_CHERCHEURS: Chercheur[] = [
   {
     id: 'halassi-abdoulhafar',
     name: 'Dr Halassi Abdoulhafar',
-    photoUrl : 'chercheurs/Dr Halassi Abdoulhafar.jpg',
+    photoUrl : '/chercheurs/Dr Halassi Abdoulhafar.jpg',
     institutionId: 'udc',
     institution: 'UDC',
     faculty: 'FST',
