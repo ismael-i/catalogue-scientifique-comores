@@ -12,11 +12,11 @@ const stats = [
 
 // Logos partenaires — remplace src par les vraies URLs/imports
 const partnerLogos = [
-  { src: '/logos/udc.png',    alt: 'Université des Comores' },
-  { src: '/logos/inrape.png', alt: 'INRAPE' },
-  { src: '/logos/lntpb.png',  alt: 'LNTPB' },
-  { src: '/logos/cndrs.png',  alt: 'CNDRS' },
-  { src: '/logos/bgc.png',    alt: 'BGC' },
+  { src: 'udc.jpeg', alt: 'Université des Comores' },
+  { src: 'inrape.jpeg', alt: 'INRAPE' },
+  { src: 'lntpb.jpeg',  alt: 'LNTPB' },
+  { src: 'cndrs.jpeg', alt: 'CNDRS' },
+  { src: 'bgc.jpeg',    alt: 'BGC' },
 ]
 
 export function Hero() {
@@ -32,7 +32,7 @@ export function Hero() {
             {partnerLogos.map(({ src, alt }) => (
               <div
                 key={alt}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg  flex items-center justify-center flex-shrink-0 overflow-hidden"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

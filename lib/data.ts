@@ -833,6 +833,7 @@ export const labos: Laboratoire[] = [
     institution: 'Université des Comores',
     institutionAcronym: 'UDC',
     domain: 'Sciences',
+    logo : '/labicon/icones 14 labos-03.svg'
   },
   {
     acronym: 'LAR2SN',
