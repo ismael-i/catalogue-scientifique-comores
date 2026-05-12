@@ -21,7 +21,7 @@ function HeroAvatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
 }
 
 export function FicheHero({ chercheur }: FicheHeroProps) {
-  const { name, photoUrl, institution, faculty, email } = chercheur
+  const { name, photoUrl, institution, faculty, email, fiche } = chercheur
   const institutionLabel = `${institution}${faculty ? ` / ${faculty}` : ''}`
 
   return (
@@ -44,10 +44,13 @@ export function FicheHero({ chercheur }: FicheHeroProps) {
 
       {/* Droite : actions */}
       <div className="flex items-center gap-3 flex-shrink-0">
-        <button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors">
+        <a 
+        href={`/${fiche}`}
+        download
+        className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors">
           <Download className="w-4 h-4" />
           Fiche PDF
-        </button>
+        </a>
         {email && (
           <a
             href={`mailto:${email}`}

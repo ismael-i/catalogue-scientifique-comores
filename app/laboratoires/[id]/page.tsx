@@ -241,6 +241,7 @@ interface ChercheurRowProps {
 }
 
 const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
+  <Link href={`/chercheurs/${chercheur.id}`} className="block">
   <div className="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
     <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
       {chercheur.photoUrl ? (
@@ -278,6 +279,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
       )}
     </div>
   </div>
+  </Link>
 )
 
 interface PublicationRowProps {

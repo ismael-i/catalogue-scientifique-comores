@@ -72,6 +72,7 @@ export interface Chercheur {
  
   // ── Notes internes ────────────────────────────────────────────────
   note?: string            // nullable
+  fiche? : string
 }
  
 // Sous-ensemble léger pour les listings (grille / liste)

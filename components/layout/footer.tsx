@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 
 export function Footer() {
@@ -12,10 +13,13 @@ export function Footer() {
           {/* About */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
+              {/* <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-xs">C</span>
               </div>
-              <h3 className="font-semibold text-white text-sm">Catalogue Scientifique</h3>
+              <h3 className="font-semibold text-white text-sm">Catalogue Scientifique</h3> */}
+               <Image src="/logo_white.png" alt="Logo"  width={250} 
+                              height={250} 
+                              className="object-contain" />
             </div>
             <p className="text-xs text-gray-400 leading-relaxed">
               Plateforme de référencement des chercheurs, laboratoires et publications scientifiques de l&apos;Union des Comores. Un outil au service de la visibilité et de la collaboration académique.
@@ -96,7 +100,7 @@ export function Footer() {
             <div className="w-30 h-30 sm:w-30 sm:h-30 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="Amb-Union-des-Comores white.png"
+                src="/Amb-Union-des-Comores white.png"
                 alt="Ambassade de France"
                 className="w-full h-full object-contain p-1"
               />

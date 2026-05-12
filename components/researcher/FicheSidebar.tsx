@@ -35,7 +35,7 @@ interface FicheSidebarProps {
 }
 
 export function FicheSidebar({ chercheur }: FicheSidebarProps) {
-  const { institution, faculty, laboratoire, effectif, email, phone, note } = chercheur
+  const { institution, faculty, laboratoire, effectif, email, phone, note, fiche } = chercheur
   const institutionLabel = `${institution}${faculty ? ` / ${faculty}` : ''}`
 
   return (
@@ -72,10 +72,13 @@ export function FicheSidebar({ chercheur }: FicheSidebarProps) {
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
         <h2 className="text-sm font-semibold text-slate-800 mb-1">Téléchargement</h2>
         <p className="text-xs text-slate-500 mb-4">Fiche complète au format PDF.</p>
-        <button className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
+        <a
+        href={`/${fiche}`}
+        download
+         className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
           <Download className="w-4 h-4" />
           Télécharger PDF
-        </button>
+        </a>
       </div>
     </div>
   )
