@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Users, FlaskConical, BookOpen, Building2 } from 'lucide-react'
+import Link from 'next/link'
 
 const stats = [
   { icon: Users,        value: 243, label: 'Chercheurs'   },
@@ -69,16 +70,15 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded flex items-center gap-2">
+            <Link href={'/chercheurs'} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded flex items-center gap-2">
               Explorer les chercheurs
               <ArrowRight size={18} />
-            </Button>
-            <Button
-              variant="outline"
+            </Link>
+            <Link href={'/a-propos'}
               className="text-gray-700 hover:text-blue-500 border-gray-300 px-6 py-3 h-auto"
             >
               En savoir plus
-            </Button>
+            </Link>
           </div>
         </div>
       </div>
