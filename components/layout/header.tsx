@@ -56,18 +56,18 @@ export function Header() {
 
           {/* Desktop : bouton Connexion */}
           <div className="hidden lg:flex items-center flex-shrink-0">
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 h-auto rounded flex items-center gap-2">
+            <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 h-auto rounded flex items-center gap-2">
               <User className="w-4 h-4" />
               Connexion
-            </Button>
+            </Link>
           </div>
 
           {/* Mobile : bouton Connexion réduit + hamburger */}
           <div className="lg:hidden flex items-center gap-2 flex-shrink-0">
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+            <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
               <User className="w-4 h-4" />
               <span className="text-xs">Connexion</span>
-            </Button>
+            </Link>
             <button
               onClick={() => setOpen(!open)}
               className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
