@@ -9,43 +9,37 @@ export interface ArticleData {
   imageUrl?: string
   imageAlt?: string
   body: string[]
-  authorName: string
-  authorPhotoUrl?: string
-  laboratoryAcronym?: string
-  laboratoryName?: string
+  chercheur?: {
+    id: string
+    name: string
+    photoUrl?: string
+    specialty?: string
+    email?: string
+  }
+  laboratoire?: {
+    id: string
+    acronym: string
+    name: string
+    logo?: string
+  }
   tags: { id: string; tag: string }[]
-}
-
-export interface TagCount {
-  name: string
-  count: number
 }
 
 export const articlesApi = {
   findAll: (params?: {
-    search?: string
-    tag?: string
-    author?: string
-    page?: number
-    limit?: number
-  }) =>
-    api.get<PaginatedResponse<ArticleData>>("/articles", { params }),
+    search?: string; tag?: string; chercheurId?: string;
+    laboratoireId?: string; page?: number; limit?: number
+  }) => api.get<PaginatedResponse<ArticleData>>("/articles", { params }),
 
-  findById: (id: string) =>
-    api.get<ArticleData>(`/articles/${id}`),
+  findById: (id: string) => api.get<ArticleData>(`/articles/${id}`),
 
-  getRecent: (limit?: number) =>
-    api.get<ArticleData[]>(`/articles/recent?limit=${limit || 5}`),
+  create: (data: {
+    title: string; description: string; body: string[];
+    chercheurId?: string; laboratoireId?: string;
+    imageUrl?: string; imageAlt?: string; tags: string[]
+  }, token: string) => api.post("/articles", data, { token }),
 
-  getTags: () =>
-    api.get<TagCount[]>("/articles/tags"),
+  update: (id: string, data: any, token: string) => api.put(`/articles/${id}`, data, { token }),
 
-  create: (data: any, token: string) =>
-    api.post("/articles", data, { token }),
-
-  update: (id: string, data: any, token: string) =>
-    api.put(`/articles/${id}`, data, { token }),
-
-  delete: (id: string, token: string) =>
-    api.delete(`/articles/${id}`, { token }),
+  delete: (id: string, token: string) => api.delete(`/articles/${id}`, { token })
 }

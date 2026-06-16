@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import { adminApi } from "@/lib/api/admin"
-import { Users, Building2, FlaskConical, FileText, Newspaper, Clock, Loader2 } from "lucide-react"
+import { Users, Building2, FlaskConical, FileText, Newspaper, Clock, Loader2, Sparkles } from "lucide-react"
 
 interface DashboardStats {
   totals: {
@@ -84,19 +84,50 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
+    <div className="max-w-7xl mx-auto px-5 sm:px-6 py-6 space-y-6">
+         {/* ── Hero card (FinPay-style) ── */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-teal-500 p-6 shadow-xl shadow-blue-200">
+            {/* decorative circles */}
+            <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10" />
+            <div className="absolute top-8 -right-4 w-24 h-24 rounded-full bg-white/10" />
+            <div className="absolute -bottom-6 left-32 w-32 h-32 rounded-full bg-teal-400/20" />
+
+            <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles size={14} className="text-yellow-300" />
+                  <span className="text-xs text-blue-100 font-semibold uppercase tracking-widest">Vue globale</span>
+                </div>
+                <p className="text-white/70 text-xs mb-1">Total chercheurs référencés</p>
+                <p className="text-white text-4xl font-extrabold tracking-tight leading-none">{stats.totals.chercheurs}</p>
+              </div>
+
+              <div className="flex gap-4 sm:gap-6 flex-wrap">
+                {[
+                  { label:"Institutions", val:stats.totals.institutions},
+                  { label:"Laboratoires", val:stats.totals.laboratoires },
+                  { label:"En attente", val:stats.totals.pendingRegistrations },
+                ].map((it) => (
+                  <div key={it.label} className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-center min-w-[80px]">
+                    <p className="text-white text-2xl font-extrabold leading-none">{it.val}</p>
+                    <p className="text-blue-100 text-[10px] mt-1 font-medium">{it.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
       {/* Cartes stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map((card) => (
           <a
             key={card.label}
             href={card.href}
-            className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow relative overflow-hidden"
+            className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group"
           >
-            <div className={`absolute top-0 left-0 w-1.5 h-full ${card.color}`} />
-            <div className="flex items-center justify-between">
+            <div className={`h-1.5 w-full bg-gradient-to-r ${card.color} `} />
+            <div className="p-5">
+              <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 mb-1">{card.label}</p>
                 <p className="text-3xl font-bold text-gray-900">
@@ -109,6 +140,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <card.icon className="w-10 h-10 text-gray-300" />
+            </div>
             </div>
           </a>
         ))}

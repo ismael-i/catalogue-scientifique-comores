@@ -83,4 +83,21 @@ export const laboratoiresApi = {
 
   delete: (id: string, token: string) =>
     api.delete(`/laboratoires/${id}`, { token }),
+  // Pour les sélecteurs
+   findAllSimple: async (institutionId?: string): Promise<{ id: string; acronym: string; name: string }[]> => {
+    const params: Record<string, string | number | undefined> = {
+      limit: 100
+    }
+    if (institutionId) {
+      params.institution = institutionId
+    }
+
+    const response = await api.get<PaginatedResponse<{ id: string; acronym: string; name: string }>>(
+      "/laboratoires",
+      { params }
+    )
+
+    // ⚡ Extraire le tableau .data de la réponse paginée
+    return response.data || []
+  }
 }

@@ -37,4 +37,6 @@ export const institutionsApi = {
 
   delete: (id: string, token: string) =>
     api.delete(`/institutions/${id}`, { token }),
+  findAllSimple: () =>
+    api.get<{ id: string; acronym: string; name: string }[]>("/institutions?limit=100"),
 }

@@ -37,6 +37,28 @@ export interface PendingUser {
   } | null
 }
 
+// Types pour la recherche de chercheurs
+export interface ChercheurSearchResult {
+  id: string
+  name: string
+  email: string | null
+  specialty: string
+  photoUrl: string | null
+  institution: { acronym: string; name: string }
+  laboratoire: { acronym: string; name: string } | null
+  hasAccount: boolean
+}
+
+export interface CreateChercheurInput {
+  name: string
+  email?: string
+  specialty: string
+  institutionId: string
+  faculty?: string
+  laboratoireId?: string
+  phone?: string
+}
+
 export const authApi = {
   login: (data: LoginInput) =>
     api.post<AuthResponse>("/auth/login", data),
@@ -57,9 +79,19 @@ export const authApi = {
   getPendingRegistrations: (token: string) =>
     api.get<PendingUser[]>("/auth/admin/pending-registrations", { token }),
 
-  validateRegistration: (userId: string, token: string) =>
-    api.post(`/auth/admin/validate/${userId}`, {}, { token }),
 
   rejectRegistration: (userId: string, reason: string, token: string) =>
     api.post(`/auth/admin/reject/${userId}`, { reason }, { token }),
+
+  // Rechercher des chercheurs pour assignation
+  searchChercheurs: (query: string, token: string) =>
+    api.get<ChercheurSearchResult[]>(`/auth/admin/search-chercheurs?q=${encodeURIComponent(query)}`, { token }),
+
+  // Créer un nouveau chercheur
+  createChercheur: (data: CreateChercheurInput, token: string) =>
+    api.post<any>("/auth/admin/create-chercheur", data, { token }),
+
+  // Valider avec assignation de chercheur
+  validateRegistration: (userId: string, chercheurId: string, token: string) =>
+    api.post(`/auth/admin/validate/${userId}`, { chercheurId }, { token }),
 }

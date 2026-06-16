@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
     document.cookie = "auth_token=; path=/; max-age=0"
-    router.push("/")
+    router.push("/auth/login")
   }, [router])
 
   return (
