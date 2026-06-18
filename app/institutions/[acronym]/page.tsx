@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { FlaskConical, Users, FileText, User } from 'lucide-react'
@@ -18,42 +18,86 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { InstIcon } from '@/components/icons'
 import { Pagination } from '@/components/Pagination'
+import { useLoading } from '@/components/LoadingProvider'
+import { InstitutionDetail, institutionsApi } from '@/lib/api/institutions'
+import { ApiError } from '@/lib/api/client'
+import { PublicationData, publicationsApi } from '@/lib/api/publications'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const LABS_PER_PAGE = 6
 const CHERCHEURS_PER_PAGE = 8
 const PUBLICATIONS_PER_PAGE = 5
 
 const InstitutionDetailPage = () => {
+  const { setIsLoading } = useLoading()
   const params = useParams<{ acronym: string }>()
   const acronym = typeof params?.acronym === 'string' ? params.acronym : ''
-  const institution = acronym ? getInstitutionByAcronym(acronym) : undefined
+  // const institution = acronym ? getInstitutionByAcronym(acronym) : undefined
 
+  const [institution, setInstitution] = useState<InstitutionDetail | null>(null)
+  const [publications, setPublications] = useState<PublicationData[]>([])
   const [labsPage, setLabsPage] = useState(1)
   const [chercheursPage, setChercheursPage] = useState(1)
   const [publicationsPage, setPublicationsPage] = useState(1)
+  const [error, setError] = useState<string | null>(null)
+  const [publicationsTotal, setPublicationsTotal] = useState(0)
+
+ // Effect 1 : charge l'institution une seule fois (quand acronym change)
+useEffect(() => {
+  if (!acronym) return
+  let isMounted = true
+  setIsLoading(true)
+  setError(null)
+
+  institutionsApi.findByAcronym(acronym)
+    .then(data => {
+      if (isMounted) setInstitution(data)
+    })
+    .catch(err => {
+      if (isMounted) setError(err instanceof ApiError ? err.message : "Institution introuvable")
+    })
+    .finally(() => {
+      if (isMounted) setIsLoading(false)
+    })
+
+  return () => { isMounted = false }
+}, [acronym])
+
+// Effect 2 : charge les publications, dépend de acronym ET publicationsPage
+useEffect(() => {
+  if (!acronym) return
+  let isMounted = true
+
+  publicationsApi.findAll({ institution: acronym, page: publicationsPage, limit: PUBLICATIONS_PER_PAGE })
+    .then(res => {
+      if (!isMounted) return
+      setPublications(res.data)
+      setPublicationsTotal(res.pagination.total)
+    })
+    .catch(() => {
+      if (isMounted) setPublications([])
+    })
+
+  return () => { isMounted = false }
+}, [acronym, publicationsPage])
 
   const labos = useMemo(
-    () => (institution ? getLabosByInstitution(institution.acronym) : []),
-    [institution],
-  )
-  const chercheurs = useMemo(
-    () => (institution ? getChercheursByInstitution(institution.acronym) : []),
-    [institution],
-  )
-  const publications = useMemo(
-    () => (institution ? getPublicationsByInstitution(institution.acronym) : []),
-    [institution],
-  )
+  () => institution?.laboratoires ?? [],
+  [institution],
+)
+const chercheurs = useMemo(
+  () => institution?.chercheurs ?? [],
+  [institution],
+)
+
 
   const labsTotalPages = Math.max(1, Math.ceil(labos.length / LABS_PER_PAGE))
   const chercheursTotalPages = Math.max(
     1,
     Math.ceil(chercheurs.length / CHERCHEURS_PER_PAGE),
   )
-  const publicationsTotalPages = Math.max(
-    1,
-    Math.ceil(publications.length / PUBLICATIONS_PER_PAGE),
-  )
+  const publicationsTotalPages = Math.max(1, Math.ceil(publicationsTotal / PUBLICATIONS_PER_PAGE))
+// publicationsSlice n'est plus nécessaire, utilise directement "publications"
 
   const labosSlice = labos.slice(
     (labsPage - 1) * LABS_PER_PAGE,
@@ -279,7 +323,15 @@ interface LabRowProps {
 const LabRow = ({ lab }: LabRowProps) => (
   <div className="flex items-start gap-3">
     <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-      <FlaskConical className="w-4 h-4 text-blue-500" />
+      {lab.logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={getFileUrl(lab.logo)}
+          alt={lab.acronym}
+        />
+      ) : (
+        <FlaskConical className="w-4 h-4 text-blue-500" />
+      )}
     </div>
     <div className="min-w-0 pt-0.5">
       <p className="text-sm text-slate-900 mb-1">
@@ -307,7 +359,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
       {chercheur.photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={chercheur.photoUrl}
+          src={getFileUrl(chercheur.photoUrl)}
           alt={chercheur.name}
           className="w-full h-full object-cover"
         />
@@ -323,7 +375,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
 )
 
 interface PublicationRowProps {
-  publication: Publication
+  publication: PublicationData
 }
 
 const PublicationRow = ({ publication }: PublicationRowProps) => (

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
+  AlertCircle,
   ArrowLeft,
   Calendar,
   FlaskConical,
@@ -13,11 +14,30 @@ import {
 import { getArticleById } from '@/lib/articles'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { ArticleData, articlesApi } from '@/lib/api/articles'
+import { useEffect, useState } from 'react'
+import { useLoading } from '@/components/LoadingProvider'
+import { ApiError } from '@/lib/api/client'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const FilInfoDetailPage = () => {
+  const [article, setArticle] = useState<ArticleData | null>(null)
+  const { setIsLoading } = useLoading()
+  const [error, setError] = useState<string | null>(null)
   const params = useParams<{ id: string }>()
   const id = typeof params?.id === 'string' ? params.id : ''
-  const article = id ? getArticleById(id) : undefined
+  // const article = id ? getArticleById(id) : undefined
+
+    useEffect(() => {
+    if (id) {
+      setIsLoading(true)
+      setError(null)
+      articlesApi.findById(id)
+        .then(data => setArticle(data))
+        .catch(err => setError(err instanceof ApiError ? err.message : "Article introuvable"))
+        .finally(() => setIsLoading(false))
+    }
+  }, [id])
 
   if (!article) {
     return (
@@ -44,6 +64,11 @@ const FilInfoDetailPage = () => {
       </div>
     )
   }
+  if (error || !article) return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex gap-3"><AlertCircle className="w-5 h-5" /><p>{error || "Article non trouvé"}</p><Link href="/admin/articles" className="text-xs underline">Retour</Link></div>
+    </div>
+  )
 
   const truncatedTitle =
     article.title.length > 36 ? `${article.title.slice(0, 36)}...` : article.title
@@ -94,11 +119,11 @@ const FilInfoDetailPage = () => {
             <div className="flex flex-wrap gap-2 mb-7">
               {article.tags.map((t) => (
                 <span
-                  key={t}
+                  key={t.tag}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-600 text-xs"
                 >
                   <TagIcon className="w-3 h-3" />
-                  {t}
+                  {t.tag}
                 </span>
               ))}
             </div>
@@ -109,7 +134,7 @@ const FilInfoDetailPage = () => {
             {article.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={article.imageUrl}
+                src={getFileUrl(article.imageUrl)}
                 alt={article.imageAlt ?? article.title}
                 className="w-full h-auto max-h-[520px] object-cover"
               />
@@ -134,11 +159,11 @@ const FilInfoDetailPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                {article.authorPhotoUrl ? (
+                {article.chercheur?.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={article.authorPhotoUrl}
-                    alt={article.authorName}
+                    src={getFileUrl(article.chercheur?.photoUrl)}
+                    alt={article.chercheur?.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -148,12 +173,12 @@ const FilInfoDetailPage = () => {
               <div className="min-w-0">
                 <p className="text-xs text-slate-500 mb-0.5">Auteur</p>
                 <p className="text-sm font-semibold text-slate-900 truncate">
-                  {article.authorName}
+                  {article.chercheur?.name}
                 </p>
               </div>
             </div>
 
-            {article.laboratoryAcronym && (
+            {article.laboratoire?.acronym && (
               <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
                   <FlaskConical className="w-4 h-4 text-blue-500" />
@@ -161,12 +186,12 @@ const FilInfoDetailPage = () => {
                 <div className="min-w-0">
                   <p className="text-xs text-slate-500 mb-0.5">Laboratoire</p>
                   <p className="text-sm font-semibold text-slate-900 leading-snug">
-                    {article.laboratoryAcronym}
-                    {article.laboratoryName && (
+                    {article.laboratoire.acronym}
+                    {article.laboratoire.name && (
                       <>
                         <span className="text-slate-400"> – </span>
                         <span className="font-normal text-slate-600">
-                          {article.laboratoryName}
+                          {article.laboratoire.name}
                         </span>
                       </>
                     )}

@@ -14,7 +14,7 @@ export default function Sidebar({ activeHref, onClose, mobile }: SidebarProps) {
     { label:"Laboratoires",    icon:<FlaskConical size={17} />,    href:"/admin/laboratoires" },
     { label:"Publications",    icon:<BookOpen size={17} />,        href:"/admin/publications" },
     { label:"Institutions",    icon:<Building2 size={17} />,       href:"/admin/institutions" },
-    { label:"Fil info",        icon:<Newspaper size={17} />,       href:"/admin/fil-info" },
+    { label:"Article",        icon:<Newspaper size={17} />,       href:"/admin/articles" },
     { label:"Demandes",        icon:<UserRoundPlus size={17} />,       href:"/admin/demandes" },
   ]
 

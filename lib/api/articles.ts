@@ -15,6 +15,7 @@ export interface ArticleData {
     photoUrl?: string
     specialty?: string
     email?: string
+    institution? : string
   }
   laboratoire?: {
     id: string

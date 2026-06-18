@@ -8,6 +8,7 @@ export interface PublicationAuthor {
   institution?: string
   faculty?: string
   email?: string
+  chercheurId?: string
 }
 
 export interface PublicationData {
@@ -35,7 +36,7 @@ export const publicationsApi = {
 
   create: (data: {
     title: string; domain: string; year: number; type: string; journal: string;
-    description: string; laboratoireId: string; authorIds: string[]; keywords: string[];
+    description: string; laboratoireId?: string; authorIds: string[]; keywords: string[];
     institutionAcronym?: string; pdfUrl?: string
   }, token: string) => api.post("/publications", data, { token }),
 

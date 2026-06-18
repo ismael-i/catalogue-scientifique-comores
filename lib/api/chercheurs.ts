@@ -24,12 +24,15 @@ export interface ChercheurDetail extends ChercheurCard {
     id: string
     acronym: string
     name: string
+    logo?: string
+    logoBg?: string
   }
   laboratoire?: {
     id: string
     acronym: string
     name: string
     publications?: any[]
+    logo?: string
   }
 }
 

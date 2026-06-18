@@ -6,7 +6,7 @@ export const uploadApi = {
    */
   uploadPhoto: (
     file: File,
-    type: "chercheurs" | "laboratoires" | "institutions",
+    type: "chercheurs" | "laboratoires" | "institutions" | 'articles',
     id: string,
     token: string
   ) => {
@@ -38,7 +38,7 @@ export const uploadApi = {
    * Supprimer une photo
    */
   deletePhoto: (
-    type: "chercheurs" | "laboratoires" | "institutions",
+    type: "chercheurs" | "laboratoires" | "institutions" | "articles",
     id: string,
     token: string
   ) => {
@@ -59,5 +59,19 @@ export const uploadApi = {
       token,
       body: JSON.stringify({ chercheurId })
     } as any)
-  }
+  },
+  uploadPublicationPDF: (file: File, publicationId: string, token: string) => {
+  const formData = new FormData()
+  formData.append("type", "publications")
+  formData.append("file", file)
+  formData.append("publicationId", publicationId)
+  return api.upload<{ url: string; path: string }>("/upload/publication-pdf", formData, { token })
+},
+
+deletePublicationPDF: (publicationId: string, token: string) =>
+  api.delete("/upload/publication-pdf", {
+    token,
+    body: JSON.stringify({ publicationId })
+  } as any)
+  
 }

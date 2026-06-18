@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
+  AlertCircle,
   ArrowRight,
   Calendar,
   Newspaper,
@@ -15,33 +16,58 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Spinner } from '@/components/ui/spinner'
 import { Pagination } from '@/components/Pagination'
+import { ArticleData, articlesApi } from '@/lib/api/articles'
+import { ApiError } from '@/lib/api/client'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const FETCH_DELAY_MS = 500
 const ITEMS_PER_PAGE = 9
 
 const FilInfoPage = () => {
-  const [items, setItems] = useState<Article[]>([])
+  const [items, setItems] = useState<ArticleData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [error, setError] = useState<string | null>(null)
+
+   const [pagination, setPagination] = useState({ total: 0, totalPages: 0, limit: 9 })
+
+    const fetchArticles = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await articlesApi.findAll({
+        search: search || undefined,
+        page,
+        limit: 9
+      })
+      setItems(result.data)
+      setPagination(result.pagination)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Erreur de chargement")
+    } finally {
+      setLoading(false)
+    }
+  }, [search, page])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setItems(articles)
+      
+     fetchArticles()
       setLoading(false)
     }, FETCH_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [])
+  }, [fetchArticles])
 
-  const filtered = useMemo<Article[]>(() => {
+  const filtered = useMemo<ArticleData[]>(() => {
     const q = search.trim().toLowerCase()
     if (!q) return items
     return items.filter(
       (a) =>
         a.title.toLowerCase().includes(q) ||
         a.description.toLowerCase().includes(q) ||
-        a.tags.some((t) => t.toLowerCase().includes(q)) ||
-        a.authorName.toLowerCase().includes(q),
+        a.tags.some((t) => t.tag.toLowerCase().includes(q)) ||
+        a.chercheur?.name.toLowerCase().includes(q),
     )
   }, [items, search])
 
@@ -83,7 +109,7 @@ const FilInfoPage = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 bg-blue-500 text-white rounded-lg px-4 py-2 self-start flex-shrink-0">
-              <span className="text-lg font-bold">{articles.length}</span>
+              <span className="text-lg font-bold">{items.length}</span>
               <span className="text-xs">actualités</span>
             </div>
           </div>
@@ -101,7 +127,11 @@ const FilInfoPage = () => {
               />
             </div>
           )}
-
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex gap-3">
+            <AlertCircle className="w-5 h-5" /><p className="text-sm">{error}</p>
+          </div>
+        )}
           {/* Results */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-lg border border-slate-200">
@@ -142,11 +172,11 @@ const FilInfoPage = () => {
 }
 
 interface FilInfoCardProps {
-  article: Article
+  article: ArticleData
 }
 
 const FilInfoCard = ({ article }: FilInfoCardProps) => {
-  const { id, date, title, description, imageUrl, imageAlt, tags, authorName } =
+  const { id, date, title, description, imageUrl, imageAlt, tags, chercheur } =
     article
 
   return (
@@ -159,7 +189,7 @@ const FilInfoCard = ({ article }: FilInfoCardProps) => {
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={imageUrl}
+            src={getFileUrl(imageUrl)}
             alt={imageAlt ?? title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
@@ -189,7 +219,7 @@ const FilInfoCard = ({ article }: FilInfoCardProps) => {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {tags.map((t) => (
-              <TagChip key={t} label={t} />
+              <TagChip key={t.tag} label={t.tag} />
             ))}
           </div>
         )}
@@ -197,7 +227,7 @@ const FilInfoCard = ({ article }: FilInfoCardProps) => {
         {/* Footer */}
         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
           <span className="text-xs text-slate-600 font-medium truncate">
-            {authorName}
+            {chercheur?.name}
           </span>
           <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors flex-shrink-0" />
         </div>

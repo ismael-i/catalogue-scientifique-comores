@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Search, Users } from 'lucide-react'
+import { AlertCircle, ChevronRight, Search, Users } from 'lucide-react'
 import type { Institution } from '@/types'
 import { institutions } from '@/lib/data'
 import { getChercheursByInstitution } from '@/lib/chercheurs'
@@ -11,25 +11,49 @@ import { Footer } from '@/components/layout/footer'
 import { InstIcon } from '@/components/icons'
 import { Spinner } from '@/components/ui/spinner'
 import { Pagination } from '@/components/Pagination'
+import { InstitutionData, institutionsApi } from '@/lib/api/institutions'
+import { ApiError } from '@/lib/api/client'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const FETCH_DELAY_MS = 500
 const ITEMS_PER_PAGE = 9
 
 const InstitutionsPage = () => {
-  const [items, setItems] = useState<Institution[]>([])
+  const [items, setItems] = useState<InstitutionData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [error, setError] = useState<string | null>(null)
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 0, limit: 12 })
+
+    // ─── Charger les institutions ──────────────────────────
+    const fetchInstitutions = useCallback(async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const result = await institutionsApi.findAll({
+          search: search || undefined,
+          page,
+          limit: pagination.limit
+        })
+        setItems(result.data)
+        setPagination(result.pagination)
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : "Erreur de chargement")
+      } finally {
+        setLoading(false)
+      }
+    }, [ search, page])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setItems(institutions)
+     fetchInstitutions()
       setLoading(false)
     }, FETCH_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [])
+  }, [fetchInstitutions])
 
-  const filtered = useMemo<Institution[]>(() => {
+  const filtered = useMemo<InstitutionData[]>(() => {
     const q = search.trim().toLowerCase()
     if (!q) return items
     return items.filter(
@@ -79,7 +103,7 @@ const InstitutionsPage = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 bg-blue-500 text-white rounded-lg px-4 py-2 self-start flex-shrink-0">
-              <span className="text-lg font-bold">{institutions.length}</span>
+              <span className="text-lg font-bold">{items.length}</span>
               <span className="text-xs">institutions répertoriées</span>
             </div>
           </div>
@@ -107,6 +131,13 @@ const InstitutionsPage = () => {
               </>
             )}
           </p>
+             {/* Erreur */}
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
 
           {/* Grid */}
           {loading ? (
@@ -148,17 +179,17 @@ const InstitutionsPage = () => {
 }
 
 interface InstitutionGridCardProps {
-  institution: Institution
+  institution: InstitutionData
 }
 
 const InstitutionGridCard = ({ institution }: InstitutionGridCardProps) => {
-  const { acronym, name, description, logo, logoBg } = institution
-  const researchers = getChercheursByInstitution(acronym).length
-  const slug = acronym.toLowerCase()
+  const { acronym, name, description, logo, logoBg, _count } = institution
+  const researchers = _count?.chercheurs || 0 
+  // const slug = acronym.toLowerCase()
 
   return (
     <Link
-      href={`/institutions/${slug}`}
+      href={`/institutions/${acronym}`}
       className="group flex flex-col bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-sm transition-all h-full"
     >
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -170,7 +201,7 @@ const InstitutionGridCard = ({ institution }: InstitutionGridCardProps) => {
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={logo}
+              src={getFileUrl(logo)}
               alt={`Logo ${acronym}`}
               className="w-full h-full object-contain p-1"
             />
