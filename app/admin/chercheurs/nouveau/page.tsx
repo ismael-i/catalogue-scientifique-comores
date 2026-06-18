@@ -210,8 +210,8 @@ export default function NouveauChercheurPage() {
       return
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, photo: "L'image ne doit pas dépasser 5MB" }))
+    if (file.size > 20 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, photo: "L'image ne doit pas dépasser 20MB" }))
       return
     }
 
