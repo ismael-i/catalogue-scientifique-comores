@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3150"
+const API_URL = process.env.NEXT_PUBLIC_API_URL_IMAGE || "http://localhost:3150"
 
 /**
  * Convertit un chemin relatif (stocké en DB) en URL complète
