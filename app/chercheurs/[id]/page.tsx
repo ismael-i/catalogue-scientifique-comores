@@ -5,7 +5,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
-import type { Chercheur, ChercheurCard } from '@/types'
+import type { Chercheur } from '@/types'
 
 import { FicheSkeleton }  from '@/components/researcher/FicheSkeleton'
 import { FicheHero }      from '@/components/researcher/FicheHero'
@@ -15,6 +15,8 @@ import { FicheRelated }   from '@/components/researcher/FicheRelated'
 import { MOCK_CHERCHEURS, MOCK_RELATED } from '@/lib/data'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { ChercheurCard, ChercheurDetail, chercheursApi } from '@/lib/api/chercheurs'
+import { ApiError } from '@/lib/api/client'
 
 interface PageProps {
   params: Promise<{ id: string }>  
@@ -23,40 +25,40 @@ interface PageProps {
 
 export default function FicheChercheurPage({ params }: PageProps) {
   const { id } = use(params)     
-    const [chercheur, setChercheur] = useState<Chercheur | null>(null)
+  const [chercheur, setChercheur] = useState<ChercheurDetail | null>(null)
   const [related, setRelated]     = useState<ChercheurCard[]>([])
   const [loading, setLoading]     = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true)
+ useEffect(() => {
+  async function fetchData() {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await chercheursApi.findById(id)
+      setChercheur(data)
+
+      // On a maintenant "data" directement, pas besoin d'attendre le state chercheur
       try {
-      const [resChercheur, resRelated] = await Promise.all([
-          fetch(`/api/chercheurs/${id}`),
-          fetch(`/api/chercheurs/${id}/related`),
-        ])
-        const [c, r] = await Promise.all([resChercheur.json(), resRelated.json()])
-        setChercheur(c)
-        setRelated(r)
-      } catch {
-        // Fallback données fictives (dev uniquement)   
-      // ✅ Cherche par id dans le tableau
-const found = MOCK_CHERCHEURS.find((c) => c.id === id) ?? MOCK_CHERCHEURS[0]
-setChercheur(found)
-
-// ✅ Related = même institution, sans le chercheur courant
-setRelated(
-  MOCK_CHERCHEURS
-    .filter((c) => c.institution === found.institution && c.id !== found.id)
-    .slice(0, 3)
-)
-      } finally {
-        setLoading(false)
+        const relatedRes = await chercheursApi.findAll({
+          institution: data.institution.id,
+          excludeId: data.id,
+          limit: 3,
+        })
+        setRelated(relatedRes.data)
+      } catch (relErr) {
+        console.error('Erreur related:', relErr)
       }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Chercheur non trouvé")
+    } finally {
+      setLoading(false)
     }
-    fetchData()
-  }, [id])
+  }
 
+  fetchData()
+}, [id])
   return (
     <div className="min-h-screen bg-gray-50">
           <Header /> 

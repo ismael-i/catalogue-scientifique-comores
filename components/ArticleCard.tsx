@@ -1,14 +1,14 @@
 import { Newspaper } from "lucide-react";
 import { ArticleCardProps } from "@/types/article";
+import { ArticleData } from "@/lib/api/articles";
+import { getFileUrl } from "@/lib/utils/fileUrl";
 
+interface ArticleCardProp{
+  article :ArticleData
+}
 
-export function ArticleCard({
-  date,
-  title,
-  description,
-  imageUrl,
-  imageAlt,
-}: ArticleCardProps) {
+export function ArticleCard({article}: ArticleCardProp) {
+  const { imageUrl, imageAlt, date, title, description } = article
   return (
     <div className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col">
       {/* Image */}
@@ -16,7 +16,7 @@ export function ArticleCard({
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={imageUrl}
+            src={getFileUrl(imageUrl)}
             alt={imageAlt ?? ''}
             className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"
           />

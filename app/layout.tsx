@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { Providers } from "./providers"
+import CookieBanner from '@/components/CookieBanner'
+import SplashOnFirstVisit from '@/components/SplashOnFirstVisit'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -38,10 +40,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="bg-white">
-      <body className="font-sans antialiased">
+      <body className={_geist.className + ' font-sans antialiased'}>
          <Providers>
+            <SplashOnFirstVisit
+            duration={10_000}
+            label="Bienvenue sur le Catalogue Scientifique des Comores…"
+          />
           {children}
         </Providers>
+         <CookieBanner />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

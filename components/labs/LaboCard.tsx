@@ -1,7 +1,9 @@
 // components/laboratoires/LaboCard.tsx
 import Link from 'next/link'
 import { FlaskConical, Users, ChevronRight } from 'lucide-react'
-import type { LaboratoireCard, LabCategorie } from '../../types'
+import type {  LabCategorie } from '../../types'
+import { LaboratoireCard } from '@/lib/api/laboratoires'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const BADGE_COLORS: Record<LabCategorie, string> = {
   Sciences:      'bg-blue-50 text-blue-600',
@@ -26,7 +28,7 @@ export function LaboCard({ labo }: LaboCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-blue-500">
               {logo ? (
-                                  <img src={logo} alt={acronym} className="w-10 h-10 object-contain" />
+                                  <img src={getFileUrl(logo)} alt={acronym} className="w-10 h-10 object-contain" />
                                 ) : (
                                    <FlaskConical className="w-4 h-4 flex-shrink-0" strokeWidth={1.8} />
                                 )}
@@ -55,7 +57,7 @@ export function LaboCard({ labo }: LaboCardProps) {
               {researchers} chercheurs
             </span>
             <span>•</span>
-            <span className="truncate max-w-[140px]">{institution}</span>
+            <span className="truncate max-w-[140px]">{institution.name}</span>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
         </div>

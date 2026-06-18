@@ -29,7 +29,7 @@ const CHERCHEURS_PER_PAGE = 8
 const PUBLICATIONS_PER_PAGE = 5
 
 const InstitutionDetailPage = () => {
-  const { setIsLoading } = useLoading()
+  const { show, hide, wrap } = useLoading()
   const params = useParams<{ acronym: string }>()
   const acronym = typeof params?.acronym === 'string' ? params.acronym : ''
   // const institution = acronym ? getInstitutionByAcronym(acronym) : undefined
@@ -46,7 +46,7 @@ const InstitutionDetailPage = () => {
 useEffect(() => {
   if (!acronym) return
   let isMounted = true
-  setIsLoading(true)
+  show({ label: 'Chargement de l\'institution…' });
   setError(null)
 
   institutionsApi.findByAcronym(acronym)
@@ -57,7 +57,7 @@ useEffect(() => {
       if (isMounted) setError(err instanceof ApiError ? err.message : "Institution introuvable")
     })
     .finally(() => {
-      if (isMounted) setIsLoading(false)
+      if (isMounted) hide()
     })
 
   return () => { isMounted = false }
@@ -170,7 +170,7 @@ const chercheurs = useMemo(
                 {institution.logo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={institution.logo}
+                    src={getFileUrl(institution.logo)}
                     alt={`Logo ${institution.acronym}`}
                     className="w-full h-full object-contain p-1"
                   />

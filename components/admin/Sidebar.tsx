@@ -8,9 +8,10 @@ type SidebarProps = { activeHref?: string; onClose?: () => void; mobile?: boolea
 
 export default function Sidebar({ activeHref, onClose, mobile }: SidebarProps) {
   const pathname = usePathname() || ""
+  //  const router = useRouter()
   const NAV = [
     { label:"Tableau de bord", icon:<LayoutDashboard size={17} />, href:"/admin/dashboard" },
-    { label:"Chercheurs",      icon:<Users size={17} />,           href:"/admin/chercheurs", badge:7 },
+    { label:"Chercheurs",      icon:<Users size={17} />,           href:"/admin/chercheurs"},
     { label:"Laboratoires",    icon:<FlaskConical size={17} />,    href:"/admin/laboratoires" },
     { label:"Publications",    icon:<BookOpen size={17} />,        href:"/admin/publications" },
     { label:"Institutions",    icon:<Building2 size={17} />,       href:"/admin/institutions" },
@@ -19,10 +20,10 @@ export default function Sidebar({ activeHref, onClose, mobile }: SidebarProps) {
   ]
 
 
-  const NAV_BOTTOM = [
-    { label:"Paramètres", icon:<Settings size={17} />, href:"/admin/settings" },
-    { label:"Aide & FAQ", icon:<HelpCircle size={17} />,href:"/admin/aide" },
-  ]
+  // const NAV_BOTTOM = [
+  //   { label:"Paramètres", icon:<Settings size={17} />, href:"/admin/settings" },
+  //   { label:"Aide & FAQ", icon:<HelpCircle size={17} />,href:"/admin/aide" },
+  // ]
 
   return (
     <aside className={`flex flex-col h-full bg-white border-r border-gray-100 ${mobile ? "w-64" : "w-[220px]"}`}>
@@ -54,17 +55,17 @@ export default function Sidebar({ activeHref, onClose, mobile }: SidebarProps) {
               )}
               <span className={active ? "text-white/90" : "text-gray-400 group-hover:text-gray-600"}>{item.icon}</span>
               <span className="flex-1">{item.label}</span>
-              {item.badge && !active && (
+              {/* {item.badge && !active && (
                 <span className="text-[10px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">{item.badge}</span>
               )}
               {item.badge && active && (
                 <span className="text-[10px] font-bold bg-white/20 text-white px-1.5 py-0.5 rounded-full">{item.badge}</span>
-              )}
+              )} */}
             </a>
           )
         })}
 
-        <div className="pt-4">
+        {/* <div className="pt-4">
           <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.12em] px-3 mb-2">Autre</p>
           {NAV_BOTTOM.map((item) => (
             <a key={item.href} href={item.href}
@@ -74,7 +75,7 @@ export default function Sidebar({ activeHref, onClose, mobile }: SidebarProps) {
               {item.label}
             </a>
           ))}
-        </div>
+        </div> */}
       </div>
 
       <div className="px-3 py-4 border-t border-gray-100">

@@ -1,20 +1,22 @@
-import { LabCardProps, LaboratoireCard } from "@/types";
+import { LabCardProps } from "@/types";
 import { LabIcon } from "../icons";
 import Link from "next/link";
+import { LaboratoireCard } from "@/lib/api/laboratoires";
+import { getFileUrl } from "@/lib/utils/fileUrl";
 interface LaboCardProps {
   labo: LaboratoireCard
 }
 
 
 export function LabCard({ labo }: LaboCardProps) {
-   const { id, acronym, name, description, categorie, researchers, institution  ,logo} = labo
+   const { id, acronym, name, description, categorie, _count, institution  ,logo} = labo
   return (
      <Link href={`/laboratoires/${id}`}>
     <div className="group bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer min-w-0">
       {/* Acronyme */}
       <div className="flex items-center gap-2 text-blue-500">
          {logo ? (
-                    <img src={logo} alt={acronym} className="w-10 h-10 object-contain" />
+                    <img src={getFileUrl(logo)} alt={acronym} className="w-10 h-10 object-contain" />
                   ) : (
                     <LabIcon className="w-4 h-4 shrink-0" />
                   )}
@@ -35,9 +37,9 @@ export function LabCard({ labo }: LaboCardProps) {
 
       {/* Footer */}
       <div className="flex items-center gap-2 text-xs text-slate-400 pt-1 border-t border-slate-100">
-        <span className="font-medium text-slate-600">{researchers} chercheurs</span>
+        <span className="font-medium text-slate-600">{_count?.chercheurs} chercheurs</span>
         <span>•</span>
-        <span>{institution}</span>
+        <span>{institution.name}</span>
       </div>
     </div>
     </Link>

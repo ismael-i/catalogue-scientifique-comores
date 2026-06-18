@@ -1,12 +1,13 @@
 import { api } from "./client"
 import type { PaginatedResponse } from "./chercheurs"
+import { LabCategorie } from "@/types"
 
 export interface LaboratoireCard {
   id: string
   acronym: string
   name: string
   description: string
-  categorie: string
+  categorie: LabCategorie
   researchers: number
   statut: string
   logo?: string
@@ -51,6 +52,7 @@ export interface LaboratoireDetail {
     faculty?: string
   }[]
   publications?: any[]
+  _count?: { chercheurs: number; publications: number }
 }
 
 export const laboratoiresApi = {

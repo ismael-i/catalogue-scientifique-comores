@@ -1,10 +1,10 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Calendar, Download, FileText, User, Users } from 'lucide-react'
-import type { Publication, PublicationAuthor } from '@/types'
+import type { Publication, PublicationDomain } from '@/types'
 import {
   domainBadgeClass,
   getPublicationById,
@@ -12,11 +12,47 @@ import {
 } from '@/lib/publications'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { useLoading } from '@/components/LoadingProvider'
+import { PublicationAuthor, PublicationData, publicationsApi } from '@/lib/api/publications'
+import { ApiError } from '@/lib/api/client'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const PublicationDetailPage = () => {
+  const { show, hide } = useLoading()
+  const [publication, setPublication] = useState<PublicationData | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [similarPublications, setSimilarPublications] = useState<PublicationData[]>([])
   const params = useParams<{ id: string }>()
   const id = typeof params?.id === 'string' ? params.id : ''
-  const publication = id ? getPublicationById(id) : undefined
+
+  useEffect(() => {
+    if (id) {
+      show({ label: "Chargement de la publication..." })
+      publicationsApi.findById(id)
+        .then(data => setPublication(data))
+        .catch(err => setError(err instanceof ApiError ? err.message : "Publication introuvable"))
+        .finally(() => hide())
+    }
+  }, [id])
+
+  const fetchPubs = useCallback(async (domain: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await publicationsApi.findAll({ domain, limit: 12 })
+      setSimilarPublications(result.data)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Erreur de chargement")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!publication) return
+    fetchPubs(publication.domain)
+  }, [publication, fetchPubs])
 
   if (!publication) {
     return (
@@ -44,7 +80,32 @@ const PublicationDetailPage = () => {
     )
   }
 
-  const similar = getSimilarPublications(publication)
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center px-6 py-20">
+            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <h1 className="text-xl font-semibold text-slate-900 mb-2">
+              Erreur
+            </h1>
+            <p className="text-sm text-slate-500 mb-6">
+              {error}
+            </p>
+            <Link
+              href="/publications"
+              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors"
+            >
+              Retour aux publications
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
   const truncatedTitle =
     publication.title.length > 32
       ? `${publication.title.slice(0, 32)}...`
@@ -76,7 +137,7 @@ const PublicationDetailPage = () => {
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
-                  domainBadgeClass[publication.domain]
+                  domainBadgeClass[publication.domain as PublicationDomain]
                 }`}
               >
                 {publication.domain}
@@ -96,8 +157,8 @@ const PublicationDetailPage = () => {
               <Users className="w-4 h-4 text-slate-400" />
               <span>
                 {publication.authors.map((a, i) => (
-                  <span key={a}>
-                    {a}
+                  <span key={a.id}>
+                    {a.name}
                     {i < publication.authors.length - 1 && (
                       <span className="text-slate-300">,&nbsp;&nbsp;</span>
                     )}
@@ -109,7 +170,7 @@ const PublicationDetailPage = () => {
             <p className="italic text-blue-500 text-sm mb-6">{publication.journal}</p>
 
             <a
-              href={publication.pdfUrl ?? '#'}
+              href={getFileUrl(publication.pdfUrl ?? '')}
               className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-md transition-colors"
             >
               <Download className="w-4 h-4" />
@@ -133,10 +194,10 @@ const PublicationDetailPage = () => {
                 <div className="flex flex-wrap gap-2">
                   {publication.keywords.map((k) => (
                     <span
-                      key={k}
+                      key={k.id}
                       className="inline-flex items-center px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-xs"
                     >
-                      {k}
+                      {k.keyword}
                     </span>
                   ))}
                 </div>
@@ -144,12 +205,12 @@ const PublicationDetailPage = () => {
 
               <Card title="Auteurs">
                 <div className="flex flex-col gap-3">
-                  {(publication.detailedAuthors ?? []).map((a) => (
-                    <AuthorRow key={a.name} author={a} />
+                  {(publication.authors ?? []).map((a) => (
+                    <AuthorRow key={a.id} author={a} />
                   ))}
-                  {!publication.detailedAuthors?.length && (
+                  {!publication.authors?.length && (
                     <p className="text-sm text-slate-500">
-                      {publication.authors.join(', ')}
+                       {publication.authors?.map((a) => a.name).join(', ')}
                     </p>
                   )}
                 </div>
@@ -166,7 +227,7 @@ const PublicationDetailPage = () => {
                   value={
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
-                        domainBadgeClass[publication.domain]
+                        domainBadgeClass[publication.domain as PublicationDomain]
                       }`}
                     >
                       {publication.domain}
@@ -184,17 +245,17 @@ const PublicationDetailPage = () => {
                     label="Laboratoire"
                     value={
                       <span className="text-sm font-medium text-blue-500">
-                        {publication.laboratoire}
+                        {publication.laboratoire.acronym}
                       </span>
                     }
                   />
                 )}
               </Card>
 
-              {similar.length > 0 && (
+              {similarPublications.length > 0 && (
                 <Card title="Publications similaires">
                   <ul className="flex flex-col gap-4">
-                    {similar.map((s) => (
+                    {similarPublications.map((s) => (
                       <li key={s.id}>
                         <SimilarItem publication={s} />
                       </li>
@@ -245,7 +306,16 @@ interface AuthorRowProps {
 const AuthorRow = ({ author }: AuthorRowProps) => (
   <div className="flex items-center gap-3">
     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-      <User className="w-4 h-4 text-slate-400" />
+      {author.photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={getFileUrl(author.photoUrl)}
+          alt={author.name}
+          className="w-full h-full rounded-full object-cover"
+        />
+      ) : (
+        <Users className="w-4 h-4 text-slate-400" />
+      )}
     </div>
     <div className="min-w-0">
       <p className="text-sm font-medium text-slate-900">{author.name}</p>
@@ -259,7 +329,7 @@ const AuthorRow = ({ author }: AuthorRowProps) => (
 )
 
 interface SimilarItemProps {
-  publication: Publication
+  publication: PublicationData
 }
 
 const SimilarItem = ({ publication }: SimilarItemProps) => (

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Menu, X, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
+import { useAuth } from "@/hooks/useAuth"
 
 const navLinks = [
   { label: 'Accueil',      href: '/' },
@@ -18,6 +19,7 @@ const navLinks = [
 
 export function Header() {
   const [open, setOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <header className="w-full bg-white border-b border-gray-200 relative z-50">
@@ -56,18 +58,47 @@ export function Header() {
 
           {/* Desktop : bouton Connexion */}
           <div className="hidden lg:flex items-center flex-shrink-0">
-            <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 h-auto rounded flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Connexion
-            </Link>
+             {user?.role === 'ADMIN' ? (
+              <Link href="admin/dashboard" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="text-xs">Dashboard</span>
+              </Link>
+            ) : user?.role === 'CHERCHEUR' ? (
+              <Link href="dashboard" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="text-xs">Dashboard</span>
+              </Link>
+            ): (
+              <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="text-xs">Connexion</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile : bouton Connexion réduit + hamburger */}
           <div className="lg:hidden flex items-center gap-2 flex-shrink-0">
-            <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+             {user?.role === 'ADMIN' ? (
+              <Link href="admin/dashboard" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="text-xs">Dashboard</span>
+              </Link>
+            ) : user?.role === 'CHERCHEUR' ? (
+              <Link href="dashboard" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="text-xs">Dashboard</span>
+              </Link>
+            ): (
+              <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="text-xs">Connexion</span>
+              </Link>
+            )
+            }
+            {/* <Link href="/auth/login" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 h-auto rounded flex items-center gap-1.5">
               <User className="w-4 h-4" />
               <span className="text-xs">Connexion</span>
-            </Link>
+            </Link> */}
             <button
               onClick={() => setOpen(!open)}
               className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"

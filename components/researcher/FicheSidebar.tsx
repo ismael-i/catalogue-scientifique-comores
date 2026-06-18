@@ -3,6 +3,8 @@
 
 import { Download } from 'lucide-react'
 import type { Chercheur } from '../../types'
+import { ChercheurDetail } from '@/lib/api/chercheurs'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 // ── Ligne d'info ─────────────────────────────────────────────────────
 interface InfoRowProps {
@@ -31,12 +33,12 @@ function InfoRow({ label, value, isEmail }: InfoRowProps) {
 
 // ── Sidebar ──────────────────────────────────────────────────────────
 interface FicheSidebarProps {
-  chercheur: Chercheur
+  chercheur: ChercheurDetail
 }
 
 export function FicheSidebar({ chercheur }: FicheSidebarProps) {
   const { institution, faculty, laboratoire, effectif, email, phone, note, fiche } = chercheur
-  const institutionLabel = `${institution}${faculty ? ` / ${faculty}` : ''}`
+  const institutionLabel = `${institution.acronym}${faculty ? ` / ${faculty}` : ''}`
 
   return (
     <div className="flex flex-col gap-4">
@@ -48,7 +50,7 @@ export function FicheSidebar({ chercheur }: FicheSidebarProps) {
         <InfoRow label="Institution" value={institutionLabel} />
 
         {laboratoire && (
-          <InfoRow label="Laboratoire" value={laboratoire} />
+          <InfoRow label="Laboratoire" value={laboratoire.name} />
         )}
 
         {effectif !== undefined && (
@@ -73,7 +75,7 @@ export function FicheSidebar({ chercheur }: FicheSidebarProps) {
         <h2 className="text-sm font-semibold text-slate-800 mb-1">Téléchargement</h2>
         <p className="text-xs text-slate-500 mb-4">Fiche complète au format PDF.</p>
         <a
-        href={`/${fiche}`}
+        href={getFileUrl(fiche)}
         download
          className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
           <Download className="w-4 h-4" />

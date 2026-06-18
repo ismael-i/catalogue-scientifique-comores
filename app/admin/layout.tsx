@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen bg-[#f8f9fc] font-sans overflow-hidden">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex flex-shrink-0">
-        <Sidebar activeHref="/admin/dashboard" />
+        <Sidebar />
       </div>
 
       {/* Mobile sidebar overlay */}

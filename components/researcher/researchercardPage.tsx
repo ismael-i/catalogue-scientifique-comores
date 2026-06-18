@@ -1,9 +1,11 @@
 import { Users, Building2 } from 'lucide-react'
-import type { Chercheur, ViewMode } from '@/types'
+import type { ViewMode } from '@/types'
 import Link from 'next/link';
+import { ChercheurCard as ChercheurCardType , ChercheurDetail } from '@/lib/api/chercheurs';
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 interface ChercheurCardProps {
-  chercheur: Chercheur
+  chercheur: ChercheurCardType | ChercheurDetail
   mode: ViewMode
 }
 
@@ -11,7 +13,7 @@ function Avatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
   if (photoUrl) {
     return (
       <img
-        src={photoUrl}
+        src={getFileUrl(photoUrl)}
         alt={name}
         className="w-full h-full object-cover rounded-full"
       />
@@ -25,7 +27,7 @@ function Avatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
 }
 
 // ── Mode grille ──────────────────────────────────────────────────────
-function GridCard({ chercheur }: { chercheur: Chercheur }) {
+function GridCard({ chercheur }: { chercheur: ChercheurCardType | ChercheurDetail }) {
   const { name, institution, faculty, specialty, photoUrl } = chercheur
 
   return (
@@ -44,7 +46,7 @@ function GridCard({ chercheur }: { chercheur: Chercheur }) {
       {/* Institution */}
       <div className="flex items-center gap-1.5 text-xs text-slate-500">
         <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" strokeWidth={1.5} />
-        <span>{institution}{faculty ? ` / ${faculty}` : ''}</span>
+        <span>{institution?.acronym}{faculty ? ` / ${faculty}` : ''}</span>
       </div>
 
       {/* Spécialité */}
@@ -57,7 +59,7 @@ function GridCard({ chercheur }: { chercheur: Chercheur }) {
 }
 
 // ── Mode liste ───────────────────────────────────────────────────────
-function ListCard({ chercheur }: { chercheur: Chercheur }) {
+function ListCard({ chercheur }: { chercheur: ChercheurCardType | ChercheurDetail }) {
   const { name, institution, faculty, photoUrl } = chercheur
 
   return (
@@ -75,7 +77,7 @@ function ListCard({ chercheur }: { chercheur: Chercheur }) {
         </h3>
         <div className="flex items-center gap-1.5 text-xs text-slate-500">
           <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" strokeWidth={1.5} />
-          <span>{institution}{faculty ? ` / ${faculty}` : ''}</span>
+          <span>{institution?.acronym}{faculty ? ` / ${faculty}` : ''}</span>
         </div>
       </div>
     </div>

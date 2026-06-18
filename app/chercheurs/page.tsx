@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, Filter, LayoutGrid, List } from 'lucide-react'
-import type { Chercheur, ViewMode } from '@/types'
+import { Search, Filter, LayoutGrid, List, AlertCircle } from 'lucide-react'
+import type { ViewMode } from '@/types'
 import { ChercheurCard } from '@/components/researcher/researchercardPage'
 import { ChercheurSkeletonList } from '@/components/ChercheurSkeleton'
 import { Pagination } from '@/components/Pagination'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { MOCK_CHERCHEURS, MOCK_RELATED } from '@/lib/data'
+import { ChercheurCard as Chercheur, chercheursApi} from '@/lib/api/chercheurs'
+import { ApiError } from '@/lib/api/client'
 
 // ── Constantes ───────────────────────────────────────────────────────
 const ITEMS_PER_PAGE = 12
@@ -31,6 +33,7 @@ export default function ChercheurPage() {
   const [search, setSearch]         = useState('')
   const [institution, setInstitution] = useState('')
   const [page, setPage]             = useState(1)
+  const [error, setError]           = useState<string | null>(null)
 
   // ── Fetch ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -38,12 +41,14 @@ export default function ChercheurPage() {
       setLoading(true)
       try {
         // Remplace cette URL par ton endpoint réel
-        const res = await fetch('/api/chercheurs')
-        const data: Chercheur[] = await res.json()
-        setChercheurs(data)
-      } catch {
+        const result = await chercheursApi.findAll({
+              })
+        // const res = await fetch('/api/chercheurs')
+        // const data: Chercheur[] = await res.json()
+        setChercheurs(result.data)
+      } catch (err) {
         // En dev, données fictives pour prévisualiser
-        setChercheurs(MOCK_CHERCHEURS)
+          setError(err instanceof ApiError ? err.message : "Erreur de chargement")
       } finally {
         setLoading(false)
       }
@@ -59,9 +64,9 @@ export default function ChercheurPage() {
         !q ||
         c.name.toLowerCase().includes(q) ||
         c.specialty.toLowerCase().includes(q) ||
-        c.institution.toLowerCase().includes(q)
+        c.institution?.acronym.toLowerCase().includes(q)
       const matchInstitution =
-        !institution || c.institution === institution
+        !institution || c.institution?.acronym === institution
       return matchSearch && matchInstitution
     })
   }, [chercheurs, search, institution])
@@ -155,6 +160,11 @@ export default function ChercheurPage() {
             </button>
           </div>
         </div>
+         {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex gap-3">
+            <AlertCircle className="w-5 h-5" /><p className="text-sm">{error}</p>
+          </div>
+        )}
 
         {/* ── Contenu ───────────────────────────────────────────── */}
         {loading ? (

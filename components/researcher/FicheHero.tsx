@@ -3,16 +3,18 @@
 
 import { Download, Mail, Building2, Users } from 'lucide-react'
 import type { Chercheur } from '../../types'
+import { ChercheurDetail } from '@/lib/api/chercheurs';
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 interface FicheHeroProps {
-  chercheur: Chercheur
+  chercheur: ChercheurDetail
 }
 
 function HeroAvatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
   return (
     <div className="w-24 h-24 rounded-xl bg-slate-100 border border-slate-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
       {photoUrl ? (
-        <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
+        <img src={getFileUrl(photoUrl)} alt={name} className="w-full h-full object-cover" />
       ) : (
         <Users className="w-10 h-10 text-slate-400" strokeWidth={1.2} />
       )}
@@ -22,7 +24,7 @@ function HeroAvatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
 
 export function FicheHero({ chercheur }: FicheHeroProps) {
   const { name, photoUrl, institution, faculty, email, fiche } = chercheur
-  const institutionLabel = `${institution}${faculty ? ` / ${faculty}` : ''}`
+  const institutionLabel = `${institution.acronym}${faculty ? ` / ${faculty}` : ''}`
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
@@ -45,7 +47,7 @@ export function FicheHero({ chercheur }: FicheHeroProps) {
       {/* Droite : actions */}
       <div className="flex items-center gap-3 flex-shrink-0">
         <a 
-        href={`/${fiche}`}
+        href={getFileUrl(fiche)}
         download
         className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors">
           <Download className="w-4 h-4" />

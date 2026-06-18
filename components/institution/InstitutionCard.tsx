@@ -1,6 +1,7 @@
 import { InstitutionCardProps } from "@/types";
 import { InstIcon } from "../icons";
 import Link from "next/link";
+import { getFileUrl } from "@/lib/utils/fileUrl";
 
 
 export function InstitutionCard({
@@ -20,7 +21,7 @@ export function InstitutionCard({
       <div className="flex items-start justify-between gap-2">
         <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
           {logo ? (
-            <img src={logo} alt={acronym} className="w-10 h-10 object-contain" />
+            <img src={getFileUrl(logo)} alt={acronym} className="w-10 h-10 object-contain" />
           ) : (
             <InstIcon className="w-6 h-6 text-slate-400" />
           )}

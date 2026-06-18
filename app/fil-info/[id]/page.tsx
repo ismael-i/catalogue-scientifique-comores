@@ -22,7 +22,7 @@ import { getFileUrl } from '@/lib/utils/fileUrl'
 
 const FilInfoDetailPage = () => {
   const [article, setArticle] = useState<ArticleData | null>(null)
-  const { setIsLoading } = useLoading()
+  const { show, hide } = useLoading()
   const [error, setError] = useState<string | null>(null)
   const params = useParams<{ id: string }>()
   const id = typeof params?.id === 'string' ? params.id : ''
@@ -30,12 +30,12 @@ const FilInfoDetailPage = () => {
 
     useEffect(() => {
     if (id) {
-      setIsLoading(true)
+    show({ label: 'Chargement de l\'article…' });
       setError(null)
       articlesApi.findById(id)
         .then(data => setArticle(data))
         .catch(err => setError(err instanceof ApiError ? err.message : "Article introuvable"))
-        .finally(() => setIsLoading(false))
+        .finally(() => hide())
     }
   }, [id])
 

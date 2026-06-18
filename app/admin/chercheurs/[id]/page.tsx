@@ -49,6 +49,7 @@ export default function AdminChercheurDetailPage() {
     async function fetchChercheur() {
       if (!token) return
       setLoading(true)
+      setError(null)
       try {
         const data = await chercheursApi.findById(id)
         setChercheur(data)

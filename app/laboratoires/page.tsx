@@ -3,13 +3,15 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { AlertCircle, Search } from 'lucide-react'
 import type { LaboratoireDetail, LabCategorie } from '../../types'
 import { LaboCard }         from '@/components/labs/LaboCard'
 import { LaboSkeletonGrid } from '@/components/LaboSkeleton'
 import { MOCK_LABORATOIRES } from '@/lib/data'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { LaboratoireCard, laboratoiresApi } from '@/lib/api/laboratoires'
+import { ApiError } from '@/lib/api/client'
 
 const CATEGORIES: { value: string; label: string }[] = [
   { value: '',              label: 'Toutes les catégories' },
@@ -21,20 +23,28 @@ const CATEGORIES: { value: string; label: string }[] = [
 ]
 
 export default function LaboratoiresPage() {
-  const [labos, setLabos]         = useState<LaboratoireDetail[]>([])
+  const [labos, setLabos]         = useState<LaboratoireCard[]>([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
   const [categorie, setCategorie] = useState('')
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 0, limit: 12 })
+    const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchLabos() {
       setLoading(true)
+      setError(null)
       try {
-        const res = await fetch('/api/laboratoires')
-        const data = await res.json()
-        setLabos(data)
-      } catch {
-        setLabos(MOCK_LABORATOIRES)
+         const result = await laboratoiresApi.findAll({
+                page,
+                limit: pagination.limit
+              }) 
+        // const data = await res.json()
+        setLabos(result.data)
+        setPagination(result.pagination)
+      } catch (err){
+        setError(err instanceof ApiError ? err.message : "Erreur de chargement")
       } finally {
         setLoading(false)
       }
@@ -50,7 +60,7 @@ export default function LaboratoiresPage() {
         l.name.toLowerCase().includes(q) ||
         l.acronym.toLowerCase().includes(q) ||
         l.description.toLowerCase().includes(q) ||
-        l.institution.toLowerCase().includes(q)
+        l.institution?.name.toLowerCase().includes(q)
       const matchCat = !categorie || l.categorie === categorie
       return matchSearch && matchCat
     })
@@ -110,6 +120,11 @@ export default function LaboratoiresPage() {
           <span className="font-semibold text-slate-800">{filtered.length}</span> laboratoires
         </p>
 
+            {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex gap-3">
+            <AlertCircle className="w-5 h-5" /><p className="text-sm">{error}</p>
+          </div>
+        )}
         {/* Grille */}
         {loading ? (
           <LaboSkeletonGrid count={8} />

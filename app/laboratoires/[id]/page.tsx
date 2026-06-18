@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
@@ -15,6 +15,11 @@ import type { Chercheur, Publication } from '@/types'
 import { MOCK_LABORATOIRES, MOCK_CHERCHEURS } from '@/lib/data'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { LaboratoireDetail, laboratoiresApi } from '@/lib/api/laboratoires'
+import { useLoading } from '@/components/LoadingProvider'
+import { ApiError } from '@/lib/api/client'
+import { getFileUrl } from '@/lib/utils/fileUrl'
+import { ChercheurCard } from '@/lib/api/chercheurs'
 
 const categorieBadgeClass: Record<string, string> = {
   Environnement: 'bg-sky-100 text-sky-700',
@@ -25,13 +30,36 @@ const categorieBadgeClass: Record<string, string> = {
 }
 
 const LaboratoireDetailPage = () => {
+
+  const [laboratoire, setLaboratoire] = useState<LaboratoireDetail | null>(null)
+  const { show, hide } = useLoading()
+  const [error, setError] = useState<string | null>(null)
   const params = useParams<{ id: string }>()
   const id = typeof params?.id === 'string' ? params.id : ''
+
+    // ─── Charger le laboratoire ────────────────────────────
+  const fetchLaboratoire = useCallback(async () => {
+    show({ label: 'Chargement du laboratoire…' })
+    setError(null)
+
+    try {
+      const data = await laboratoiresApi.findById(id)
+      setLaboratoire(data)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Laboratoire non trouvé")
+    } finally {
+      hide()
+    }
+  }, [ id])
+
+  useEffect(() => {
+    if ( id) fetchLaboratoire()
+  }, [ id, fetchLaboratoire])
   const lab = id
     ? MOCK_LABORATOIRES.find((l) => l.id.toLowerCase() === id.toLowerCase())
     : undefined
 
-  if (!lab) {
+  if (error || !laboratoire) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
         <Header />
@@ -57,13 +85,13 @@ const LaboratoireDetailPage = () => {
     )
   }
 
-  const affilies = MOCK_CHERCHEURS.filter(
-    (c) => c.laboratoireId?.toLowerCase() === lab.id.toLowerCase(),
-  )
-  const publications = lab.publications ?? []
-  const partenariats = lab.partenariats ?? []
-  const thematiquesText = (lab.thematiques ?? []).join(', ')
-  const badgeClass = categorieBadgeClass[lab.categorie] ?? 'bg-slate-100 text-slate-700'
+  // const affilies = MOCK_CHERCHEURS.filter(
+  //   (c) => c.laboratoireId?.toLowerCase() === lab.id.toLowerCase(),
+  // )
+  // const publications = lab.publications ?? []
+  // const partenariats = lab.partenariats ?? []
+  const thematiquesText = (laboratoire.thematiques ?? []).join(', ')
+  const badgeClass = categorieBadgeClass[laboratoire.categorie] ?? 'bg-slate-100 text-slate-700'
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -80,7 +108,7 @@ const LaboratoireDetailPage = () => {
             Laboratoires
           </Link>
           <span className="mx-1.5 text-slate-300">/</span>
-          <span className="text-slate-700">{lab.acronym}</span>
+          <span className="text-slate-700">{laboratoire.acronym}</span>
         </div>
       </div>
 
@@ -90,8 +118,8 @@ const LaboratoireDetailPage = () => {
           <div className="max-w-6xl mx-auto px-6 pt-10 pb-10">
             <div className="flex items-start gap-4 mb-5">
               <div className="w-14 h-14 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
-                 {lab.logo ? (
-                                  <img src={lab.logo} alt={lab.acronym} className="w-30 h-30 object-contain" />
+                 {laboratoire.logo ? (
+                                  <img src={getFileUrl(laboratoire.logo)} alt={laboratoire.acronym} className="w-30 h-30 object-contain" />
                                 ) : (
                                    <FlaskConical className="w-4 h-4 flex-shrink-0" strokeWidth={1.8} />
                                 )}
@@ -99,12 +127,12 @@ const LaboratoireDetailPage = () => {
               <div className="min-w-0 pt-1">
                 <div className="flex flex-wrap items-center gap-3 mb-1">
                   <span className="text-xl font-bold text-blue-500 tracking-wide">
-                    {lab.acronym}
+                    {laboratoire.acronym}
                   </span>
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}`}
                   >
-                    {lab.categorie}
+                    {laboratoire.categorie}
                   </span>
                 </div>
                 <p className="text-sm text-slate-500">Actif</p>
@@ -112,11 +140,11 @@ const LaboratoireDetailPage = () => {
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight mb-4 max-w-4xl">
-              {lab.name}
+              {laboratoire.name}
             </h1>
 
             <p className="text-sm text-slate-500 leading-relaxed max-w-3xl">
-              {lab.description}
+              {laboratoire.description}
             </p>
           </div>
         </section>
@@ -139,13 +167,13 @@ const LaboratoireDetailPage = () => {
 
               <SectionCard
                 icon={<Users className="w-5 h-5 text-blue-500" />}
-                title={`Chercheurs affiliés (${affilies.length})`}
+                title={`Chercheurs affiliés (${laboratoire._count?.chercheurs })`}
               >
-                {affilies.length === 0 ? (
+                {laboratoire._count?.chercheurs === 0 ? (
                   <p className="text-sm text-slate-500">Aucun chercheur affilié.</p>
                 ) : (
                   <ul className="flex flex-col gap-3">
-                    {affilies.map((c) => (
+                    {laboratoire.chercheurs?.map((c) => (
                       <li key={c.id}>
                         <ChercheurRow chercheur={c} />
                       </li>
@@ -156,15 +184,15 @@ const LaboratoireDetailPage = () => {
 
               <SectionCard
                 icon={<FileText className="w-5 h-5 text-blue-500" />}
-                title={`Publications (${publications.length})`}
+                title={`Publications (${laboratoire._count?.publications })`}
               >
-                {publications.length === 0 ? (
+                {laboratoire.publications?.length === 0 ? (
                   <p className="text-sm text-slate-500">
                     Aucune publication référencée.
                   </p>
                 ) : (
                   <ul className="flex flex-col gap-3">
-                    {publications.map((p) => (
+                    {laboratoire.publications?.map((p) => (
                       <li key={p.id}>
                         <PublicationRow publication={p} />
                       </li>
@@ -180,31 +208,31 @@ const LaboratoireDetailPage = () => {
                 <h3 className="text-base font-semibold text-slate-900 mb-4">
                   Informations
                 </h3>
-                <InfoRow label="Institution" value={lab.institution} />
+                <InfoRow label="Institution" value={laboratoire.institution?.name} />
                 <InfoRow
                   label="Domaine"
                   value={
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}`}
                     >
-                      {lab.categorie}
+                      {laboratoire.categorie}
                     </span>
                   }
                 />
                 <InfoRow label="Statut" value="Actif" />
-                <InfoRow label="Chercheurs" value={String(lab.researchers)} />
-                {lab.responsable && (
-                  <InfoRow label="Responsable" value={lab.responsable.name} />
+                <InfoRow label="Chercheurs" value={String(laboratoire.chercheurs?.length)} />
+                {laboratoire.responsable && (
+                  <InfoRow label="Responsable" value={laboratoire.responsable.name} />
                 )}
               </div>
 
-              {partenariats.length > 0 && (
+              {laboratoire.partenariats?.length > 0 && (
                 <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5">
                   <h3 className="text-base font-semibold text-slate-900 mb-3">
                     Partenariats
                   </h3>
                   <p className="text-sm text-slate-600 leading-relaxed">
-                    {partenariats.join(', ')}
+                    {laboratoire.partenariats?.join(', ')}
                   </p>
                 </div>
               )}
@@ -237,7 +265,7 @@ const SectionCard = ({ icon, title, children }: SectionCardProps) => (
 )
 
 interface ChercheurRowProps {
-  chercheur: Chercheur
+  chercheur: ChercheurCard & { email?: string; phone?: string }
 }
 
 const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
@@ -247,7 +275,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
       {chercheur.photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={chercheur.photoUrl}
+          src={getFileUrl(chercheur.photoUrl)}
           alt={chercheur.name}
           className="w-full h-full object-cover"
         />
@@ -261,13 +289,12 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
       {(chercheur.email || chercheur.phone) && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
           {chercheur.email && (
-            <a
-              href={`mailto:${chercheur.email}`}
+            <p
               className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors"
             >
               <Mail className="w-3.5 h-3.5" />
               {chercheur.email}
-            </a>
+            </p>
           )}
           {chercheur.phone && (
             <span className="inline-flex items-center gap-1 text-slate-500">

@@ -1,18 +1,20 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Calendar, FileText, Search } from 'lucide-react'
 import type { Publication, PublicationDomain } from '@/types'
 import {
   publications,
-  PUBLICATION_DOMAINS,
   domainBadgeClass,
+  PUBLICATION_DOMAINS,
 } from '@/lib/publications'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Spinner } from '@/components/ui/spinner'
 import { Pagination } from '@/components/Pagination'
+import { PublicationData, publicationsApi } from '@/lib/api/publications'
+import { ApiError } from '@/lib/api/client'
 
 const ALL_DOMAINS = '' as const
 const ALL_YEARS = '' as const
@@ -20,16 +22,35 @@ const FETCH_DELAY_MS = 600
 const ITEMS_PER_PAGE = 8
 
 const PublicationsPage = () => {
-  const [items, setItems] = useState<Publication[]>([])
+  const [items, setItems] = useState<PublicationData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [domain, setDomain] = useState<PublicationDomain | ''>(ALL_DOMAINS)
   const [year, setYear] = useState<number | ''>(ALL_YEARS)
   const [page, setPage] = useState(1)
+   const [error, setError] = useState<string | null>(null)
+
+
+  const fetchPubs = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await publicationsApi.findAll({
+        page,
+        limit: 12
+      })
+      setItems(result.data)
+   
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Erreur de chargement")
+    } finally {
+      setLoading(false)
+    }
+  }, [ page])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setItems(publications)
+      fetchPubs()
       setLoading(false)
     }, FETCH_DELAY_MS)
     return () => clearTimeout(timer)
@@ -40,14 +61,14 @@ const PublicationsPage = () => {
     return Array.from(set).sort((a, b) => b - a)
   }, [items])
 
-  const filtered = useMemo<Publication[]>(() => {
+  const filtered = useMemo<PublicationData[]>(() => {
     const q = search.trim().toLowerCase()
     return items.filter((p) => {
       const matchSearch =
         !q ||
         p.title.toLowerCase().includes(q) ||
-        p.authors.some((a) => a.toLowerCase().includes(q)) ||
-        p.keywords.some((k) => k.toLowerCase().includes(q))
+        p.authors.some((a) => a.name.toLowerCase().includes(q)) ||
+        p.keywords.some((k) => k.keyword.toLowerCase().includes(q))
       const matchDomain = !domain || p.domain === domain
       const matchYear = !year || p.year === year
       return matchSearch && matchDomain && matchYear
@@ -189,7 +210,7 @@ const PublicationsPage = () => {
 }
 
 interface PublicationListItemProps {
-  publication: Publication
+  publication: PublicationData
 }
 
 const PublicationListItem = ({ publication }: PublicationListItemProps) => {
@@ -215,7 +236,7 @@ const PublicationListItem = ({ publication }: PublicationListItemProps) => {
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-3 mb-2">
             <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${domainBadgeClass[domain]}`}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${domainBadgeClass[domain as PublicationDomain]}`}
             >
               {domain}
             </span>
@@ -232,7 +253,10 @@ const PublicationListItem = ({ publication }: PublicationListItemProps) => {
           </h2>
 
           {/* Authors */}
-          <p className="text-xs text-slate-600 mb-1">{authors.join(', ')}</p>
+          <p className="text-xs text-slate-600 mb-1">
+    
+            {authors.map((a) => a.name).join(', ')}
+          </p>
 
           {/* Journal */}
           <p className="text-xs italic text-blue-500 mb-2">{journal}</p>
@@ -244,10 +268,10 @@ const PublicationListItem = ({ publication }: PublicationListItemProps) => {
           <div className="flex flex-wrap gap-1.5">
             {keywords.map((k) => (
               <span
-                key={k}
+                key={k.id}
                 className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-xs"
               >
-                {k}
+                {k.keyword}
               </span>
             ))}
           </div>

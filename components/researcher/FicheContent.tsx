@@ -3,6 +3,7 @@
 
 import { BookOpen, FileText, Handshake } from 'lucide-react'
 import type { Chercheur } from '../../types'
+import { ChercheurDetail } from '@/lib/api/chercheurs'
 
 // ── Bloc section générique ───────────────────────────────────────────
 interface SectionCardProps {
@@ -25,11 +26,11 @@ function SectionCard({ icon, title, children }: SectionCardProps) {
 
 // ── Colonne gauche ───────────────────────────────────────────────────
 interface FicheContentProps {
-  chercheur: Chercheur
+  chercheur: ChercheurDetail
 }
 
 export function FicheContent({ chercheur }: FicheContentProps) {
-  const { specialty, publications, partenariats } = chercheur
+  const { specialty, publicationAuthors, partenariats } = chercheur
 
   return (
     <div className="flex flex-col gap-4">
@@ -43,12 +44,17 @@ export function FicheContent({ chercheur }: FicheContentProps) {
       </SectionCard>
 
       {/* Publications — conditionnel */}
-      {publications && (
+
+          {publicationAuthors && publicationAuthors.length > 0 && (
         <SectionCard
           icon={<FileText className="w-4 h-4" />}
           title="Publications"
         >
-          {publications}
+          {publicationAuthors.map((pa) => (
+            <div key={pa.id} className="mb-2 last:mb-0">
+              {pa.publication?.title ?? 'Titre indisponible'}
+            </div>
+          ))}
         </SectionCard>
       )}
 

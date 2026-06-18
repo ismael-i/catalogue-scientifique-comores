@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Hero } from '@/components/sections/hero'
@@ -10,6 +10,9 @@ import LabPage from '@/components/sections/LabPage'
 import { Section } from '@/components/sections/Section'
 import { articles } from '@/lib/articles'
 import { ArticleCard } from '@/components/ArticleCard'
+import { ArticleData, articlesApi } from '@/lib/api/articles'
+import { ApiError } from '@/lib/api/client'
+import { AlertCircle } from 'lucide-react'
 
 export default function Home() {
   // const [searchQuery, setSearchQuery] = useState('')
@@ -20,6 +23,28 @@ export default function Home() {
   //     item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
   //     item.description.toLowerCase().includes(searchQuery.toLowerCase())
   // )
+
+    const [items, setItems] = useState<ArticleData[]>([])
+    const [error, setError] = useState<string | null>(null) 
+    const [loading, setLoading]     = useState(true)
+
+      useEffect(() => {
+    async function fetchArcticle() {
+      setLoading(true)
+      setError(null)
+      try {
+         const result = await articlesApi.findAll({
+                 limit: 3
+               })
+        setItems(result.data)
+      } catch (err){
+        setError(err instanceof ApiError ? err.message : "Erreur de chargement")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchArcticle()
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -45,8 +70,14 @@ export default function Home() {
                 viewAllLabel="Voir tout →"
                 cols={3}
               >
-              {articles.slice(0, 3).map((article) => (
-                <ArticleCard key={article.id} {...article} />
+                
+            {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex gap-3">
+                  <AlertCircle className="w-5 h-5" /><p className="text-sm">{error}</p>
+                </div>
+              )}
+              {items.map((article) => (
+                <ArticleCard key={article.id} article={article} />
               ))}
               </Section>
             </div>

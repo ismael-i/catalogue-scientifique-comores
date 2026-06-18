@@ -3,7 +3,9 @@
 
 import Link from 'next/link'
 import { Users } from 'lucide-react'
-import type { ChercheurCard } from '../../types'
+import { ChercheurCard } from '@/lib/api/chercheurs'
+import { getFileUrl } from '@/lib/utils/fileUrl'
+
 
 interface MiniCardProps {
   chercheur: ChercheurCard
@@ -18,7 +20,7 @@ function MiniCard({ chercheur }: MiniCardProps) {
         <div className="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden">
           {chercheur.photoUrl ? (
             <img
-              src={chercheur.photoUrl}
+              src={getFileUrl(chercheur.photoUrl)}
               alt={chercheur.name}
               className="w-full h-full object-cover"
             />

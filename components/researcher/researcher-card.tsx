@@ -3,13 +3,15 @@
 import { Users } from 'lucide-react'
 import type { Chercheur, ViewMode } from '@/types'
 import Link from 'next/link'
+import { ChercheurCard } from '@/lib/api/chercheurs'
+import { getFileUrl } from '@/lib/utils/fileUrl'
 
 interface ChercheurCardProps {
-  chercheur: Chercheur
+  chercheur: ChercheurCard
 
 }
 
-export function ResearcherCard({ chercheur }: { chercheur: Chercheur }){
+export function ResearcherCard({ chercheur }: { chercheur: ChercheurCard }){
     const { name, institution, faculty, specialty, photoUrl } = chercheur
   return (
     <Link href={`chercheurs/${chercheur.id}`} className="block">
@@ -19,7 +21,7 @@ export function ResearcherCard({ chercheur }: { chercheur: Chercheur }){
         <div className="flex-shrink-0">
           {photoUrl? (
             <img 
-              src={photoUrl}
+              src={getFileUrl(photoUrl)}
               alt={name}
               className="w-12 h-12 rounded-full object-cover"
             />
@@ -36,7 +38,7 @@ export function ResearcherCard({ chercheur }: { chercheur: Chercheur }){
             {name}
           </h3>
           <p className="text-xs text-gray-600 mt-1">
-            <span>{institution}{faculty ? ` / ${faculty}` : ''}</span>
+            <span>{institution?.acronym}{faculty ? ` / ${faculty}` : ''}</span>
           </p>
           <p className="text-xs text-gray-700 mt-2 line-clamp-2">
             {specialty}
