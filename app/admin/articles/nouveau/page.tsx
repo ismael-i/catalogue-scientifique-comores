@@ -89,7 +89,7 @@ export default function NouvelArticlePage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith("image/")) { setErrors(prev => ({ ...prev, image: "Format image requis" })); return }
-    if (file.size > 5 * 1024 * 1024) { setErrors(prev => ({ ...prev, image: "Max 5MB" })); return }
+    if (file.size > 10 * 1024 * 1024) { setErrors(prev => ({ ...prev, image: "Max 10MB" })); return }
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
     setErrors(prev => { const c = { ...prev }; delete c.image; return c })

@@ -210,8 +210,8 @@ export default function NouveauChercheurPage() {
       return
     }
 
-    if (file.size > 20 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, photo: "L'image ne doit pas dépasser 20MB" }))
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, photo: "L'image ne doit pas dépasser 10MB" }))
       return
     }
 
@@ -451,7 +451,7 @@ export default function NouveauChercheurPage() {
                   )}
                 </div>
                 {errors.photo && <p className="text-xs text-red-500 mt-1">{errors.photo}</p>}
-                <p className="text-[10px] text-gray-400 mt-1">JPG, PNG, WebP • Max 5MB</p>
+                <p className="text-[10px] text-gray-400 mt-1">JPG, PNG, WebP • Max 10MB</p>
               </div>
 
               {/* Champs identité */}

@@ -552,7 +552,7 @@ export default function ModifierArticlePage() {
         <p className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
           Ajouter une image d'illustration
         </p>
-        <p className="text-xs text-gray-400">JPG, PNG ou WebP • Max 5 MB</p>
+        <p className="text-xs text-gray-400">JPG, PNG ou WebP • Max 10 MB</p>
       </div>
       <input
         type="file"

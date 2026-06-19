@@ -1,13 +1,12 @@
 'use client'
 // app/laboratoires/page.tsx
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { AlertCircle, Search } from 'lucide-react'
 import type { LaboratoireDetail, LabCategorie } from '../../types'
 import { LaboCard }         from '@/components/labs/LaboCard'
 import { LaboSkeletonGrid } from '@/components/LaboSkeleton'
-import { MOCK_LABORATOIRES } from '@/lib/data'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { LaboratoireCard, laboratoiresApi } from '@/lib/api/laboratoires'
@@ -29,46 +28,51 @@ export default function LaboratoiresPage() {
   const [categorie, setCategorie] = useState('')
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState({ total: 0, totalPages: 0, limit: 12 })
-    const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  // ─── Fetch laboratoires (dépend de page + filtres serveur) ──────────
+  const fetchLabos = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await laboratoiresApi.findAll({
+        page,
+        limit: pagination.limit,
+        category: categorie || undefined,
+      })
+      setLabos(result.data)
+      setPagination(result.pagination)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Erreur de chargement")
+    } finally {
+      setLoading(false)
+    }
+  }, [page, categorie, pagination.limit])
 
   useEffect(() => {
-    async function fetchLabos() {
-      setLoading(true)
-      setError(null)
-      try {
-         const result = await laboratoiresApi.findAll({
-                page,
-                limit: pagination.limit
-              }) 
-        // const data = await res.json()
-        setLabos(result.data)
-        setPagination(result.pagination)
-      } catch (err){
-        setError(err instanceof ApiError ? err.message : "Erreur de chargement")
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchLabos()
-  }, [])
+  }, [fetchLabos])
 
+  // Revenir à la page 1 quand on change de catégorie
+  useEffect(() => {
+    setPage(1)
+  }, [categorie])
+
+  // ─── Filtrage local : uniquement sur la recherche texte (côté client) ──
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
-    return labos.filter((l) => {
-      const matchSearch =
-        !q ||
-        l.name.toLowerCase().includes(q) ||
-        l.acronym.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q) ||
-        l.institution?.name.toLowerCase().includes(q)
-      const matchCat = !categorie || l.categorie === categorie
-      return matchSearch && matchCat
-    })
-  }, [labos, search, categorie])
+    if (!q) return labos
+    return labos.filter((l) =>
+      l.name.toLowerCase().includes(q) ||
+      l.acronym.toLowerCase().includes(q) ||
+      l.description.toLowerCase().includes(q) ||
+      l.institution?.name.toLowerCase().includes(q)
+    )
+  }, [labos, search])
 
   return (
     <div className="min-h-screen bg-gray-50">
-        <Header />
+      <Header />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         {/* Breadcrumb */}
@@ -117,14 +121,15 @@ export default function LaboratoiresPage() {
 
         {/* Compteur */}
         <p className="text-sm text-slate-500 mb-5">
-          <span className="font-semibold text-slate-800">{filtered.length}</span> laboratoires
+          <span className="font-semibold text-slate-800">{pagination.total}</span> laboratoires
         </p>
 
-            {error && (
+        {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex gap-3">
             <AlertCircle className="w-5 h-5" /><p className="text-sm">{error}</p>
           </div>
         )}
+
         {/* Grille */}
         {loading ? (
           <LaboSkeletonGrid count={8} />
@@ -134,65 +139,65 @@ export default function LaboratoiresPage() {
             <p className="text-slate-500 text-sm">Aucun laboratoire ne correspond à votre recherche.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             {filtered.map((labo) => (
               <LaboCard key={labo.id} labo={labo} />
             ))}
           </div>
         )}
 
-         {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-3">
-              <p className="text-xs text-gray-400">
-                Page {page} sur {pagination.totalPages} • {pagination.total} résultats
-              </p>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  Précédent
-                </button>
-                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                  let pageNum: number
-                  if (pagination.totalPages <= 5) {
-                    pageNum = i + 1
-                  } else if (page <= 3) {
-                    pageNum = i + 1
-                  } else if (page >= pagination.totalPages - 2) {
-                    pageNum = pagination.totalPages - 4 + i
-                  } else {
-                    pageNum = page - 2 + i
-                  }
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
-                        page === pageNum
-                          ? "bg-blue-600 text-white"
-                          : "border border-gray-200 hover:bg-gray-50 text-gray-600"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  )
-                })}
-                <button
-                  onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
-                  disabled={page === pagination.totalPages}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  Suivant
-                </button>
-              </div>
+        {/* Pagination */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-3">
+            <p className="text-xs text-gray-400">
+              Page {page} sur {pagination.totalPages} • {pagination.total} résultats
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Précédent
+              </button>
+              {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                let pageNum: number
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1
+                } else if (page <= 3) {
+                  pageNum = i + 1
+                } else if (page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i
+                } else {
+                  pageNum = page - 2 + i
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
+                      page === pageNum
+                        ? "bg-blue-600 text-white"
+                        : "border border-gray-200 hover:bg-gray-50 text-gray-600"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                )
+              })}
+              <button
+                onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                disabled={page === pagination.totalPages}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Suivant
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
       </div>
-         <Footer />
+      <Footer />
     </div>
   )
 }

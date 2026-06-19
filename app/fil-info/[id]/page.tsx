@@ -106,7 +106,7 @@ const FilInfoDetailPage = () => {
           {/* Date */}
           <div className="inline-flex items-center gap-2 text-sm text-slate-500 mb-3">
             <Calendar className="w-4 h-4" />
-            {article.date}
+            {new Date(article.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
           </div>
 
           {/* Title */}

@@ -204,7 +204,7 @@ const FilInfoCard = ({ article }: FilInfoCardProps) => {
       <div className="flex flex-col flex-1 p-5">
         <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 mb-2">
           <Calendar className="w-3.5 h-3.5" />
-          {date}
+          {new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
         </div>
 
         <h2 className="text-base font-semibold text-slate-900 mb-2 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
