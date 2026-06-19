@@ -262,9 +262,9 @@ useEffect(() => {
       return
     }
 
-    // Valider la taille (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      setPhotoError("L'image ne doit pas dépasser 5MB")
+    // Valider la taille (20MB max)
+    if (file.size > 20 * 1024 * 1024) {
+      setPhotoError("L'image ne doit pas dépasser 20MB")
       return
     }
 
@@ -719,7 +719,7 @@ useEffect(() => {
                   </p>
                 )}
                 <p className="text-[10px] text-gray-400 mt-1">
-                  JPG, PNG, WebP • Max 5MB
+                  JPG, PNG, WebP • Max 20MB
                 </p>
               </div>
 
