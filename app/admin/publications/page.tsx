@@ -118,10 +118,17 @@ export default function AdminPublicationsPage() {
                           <p className="text-xs text-gray-400 mt-0.5">{pub.journal} ({pub.year})</p>
                         </Link>
                       </td>
-                      <td className="px-4 py-4 hidden md:table-cell text-xs text-gray-500">
-                        {pub.authors?.slice(0, 3).map(a => a.name).join(", ")}{pub.authors?.length > 3 ? " et al." : ""}
+                       <td className="px-4 py-4 hidden md:table-cell text-xs text-gray-500">
+                          {pub.authors?.slice(0, 3).map(a => a.name).join(", ")}
+                          {pub.authors && pub.authors.length > 3 ? " et al." : ""}
+                          {pub.othersAuthors && pub.othersAuthors.length > 0 && (
+                            <>
+                              {pub.authors && pub.authors.length > 0 ? ", " : ""}
+                              {pub.othersAuthors.join(", ")}
+                            </>
+                          )}
                       </td>
-                      <td className="px-4 py-4">
+                        <td className="px-4 py-4">
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${getDomainColor(pub.domain)}`}>{pub.domain}</span>
                       </td>
                       <td className="px-5 py-4">

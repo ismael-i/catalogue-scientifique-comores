@@ -59,6 +59,26 @@ export interface CreateChercheurInput {
   phone?: string
 }
 
+// Types pour la gestion du mot de passe
+export interface ForgotPasswordInput {
+  email: string
+}
+ 
+export interface ResetPasswordInput {
+  token: string
+  newPassword: string
+}
+ 
+export interface ChangePasswordInput {
+  currentPassword: string
+  newPassword: string
+}
+ 
+export interface VerifyResetTokenResult {
+  valid: boolean
+  email: string
+}
+
 export const authApi = {
   login: (data: LoginInput) =>
     api.post<AuthResponse>("/auth/login", data),
@@ -94,4 +114,29 @@ export const authApi = {
   // Valider avec assignation de chercheur
   validateRegistration: (userId: string, chercheurId: string, token: string) =>
     api.post(`/auth/admin/validate/${userId}`, { chercheurId }, { token }),
+
+
+    // 1. Demande de réinitialisation (mot de passe oublié) — pas de token requis
+  forgotPassword: (data: ForgotPasswordInput) =>
+    api.post<{ message: string }>("/auth/forgot-password", data),
+ 
+  // 2. Vérifier la validité d'un token reçu par email, avant d'afficher le formulaire
+  verifyResetToken: (token: string) =>
+    api.get<VerifyResetTokenResult>(`/auth/verify-reset-token?token=${encodeURIComponent(token)}`),
+ 
+  // 3. Réinitialisation avec le token reçu par email — pas de token d'auth requis
+  resetPassword: (data: ResetPasswordInput) =>
+    api.post<{ message: string }>("/auth/reset-password", data),
+ 
+  // 4. Changement de mot de passe (utilisateur connecté)
+  changePassword: (data: ChangePasswordInput, token: string) =>
+    api.post<{ message: string }>("/auth/change-password", data, { token }),
+ 
+  // 5. Réinitialisation par un administrateur, même pattern que reject/validate
+  adminResetPassword: (targetUserId: string, newPassword: string, token: string) =>
+    api.post<{ message: string }>(
+      "/auth/admin/reset-password",
+      { userId: targetUserId, newPassword },
+      { token }
+    ),
 }

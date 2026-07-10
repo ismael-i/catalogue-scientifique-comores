@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { authApi, type PendingUser } from "@/lib/api/auth"
@@ -19,8 +19,13 @@ import {
   UserX,
   Users,
   Filter,
-  ExternalLink
+  ExternalLink,
+  EyeOff,
+  Eye,
+  KeyRound,
+  ArrowLeft
 } from "lucide-react"
+import { validatePassword } from "@/lib/validators/password"
 
 // ─── Types ──────────────────────────────────────────────
 type Status = "ALL" | "PENDING" | "VALIDATED" | "ACTIVE" | "REJECTED"
@@ -83,7 +88,7 @@ function StatusBadge({ status }: { status: string }) {
     </span>
   )
 }
-
+type DetailStep = "details" | "changePassword"
 // ─── Modal de rejet ─────────────────────────────────────
 function RejectModal({ 
   show, 
@@ -166,79 +171,232 @@ function RejectModal({
 }
 
 // ─── Modal de détail ────────────────────────────────────
-function DetailModal({ 
-  show, 
-  user, 
-  onClose 
-}: { 
+function DetailModal({
+  show,
+  user,
+  onClose
+}: {
   show: boolean
   user: UserWithStatus | null
   onClose: () => void
 }) {
+  const { token } = useAuth()
+ 
+  const [step, setStep] = useState<DetailStep>("details")
+ 
+  // États du formulaire de changement de mot de passe
+  const [newPassword, setNewPassword] = useState("")
+  const [showNew, setShowNew] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [pwdError, setPwdError] = useState<string | null>(null)
+  const [pwdSuccess, setPwdSuccess] = useState(false)
+ 
   if (!show || !user) return null
-
+ 
+  const passwordCheck = validatePassword(newPassword)
+ 
+  // ─── Fermer et tout réinitialiser ───────────────────────
+  function handleClose() {
+    setStep("details")
+    setNewPassword("")
+    setShowNew(false)
+    setPwdError(null)
+    setPwdSuccess(false)
+    onClose()
+  }
+ 
+  // ─── Revenir aux détails ─────────────────────────────────
+  function goToDetails() {
+    setStep("details")
+    setNewPassword("")
+    setPwdError(null)
+    setPwdSuccess(false)
+  }
+ 
+  // ─── Soumettre la réinitialisation ──────────────────────
+  async function handleResetPassword(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!token || !user || !passwordCheck.isValid) return
+ 
+    setSaving(true)
+    setPwdError(null)
+ 
+    try {
+      await authApi.adminResetPassword(user.id, newPassword, token)
+      setPwdSuccess(true)
+      setNewPassword("")
+      setTimeout(() => {
+        goToDetails()
+      }, 1600)
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : "Impossible de réinitialiser ce mot de passe."
+      setPwdError(message)
+    } finally {
+      setSaving(false)
+    }
+  }
+ 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose} />
+ 
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center border border-blue-50">
-              <span className="text-blue-700 font-bold text-lg">
-                {user.name.split(" ").slice(-1)[0]?.[0] ?? "?"}
-              </span>
+        {step === "details" ? (
+          /* ─── VUE : DÉTAILS DE L'UTILISATEUR ────────────── */
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center border border-blue-50">
+                  <span className="text-blue-700 font-bold text-lg">
+                    {user.name.split(" ").slice(-1)[0]?.[0] ?? "?"}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{user.name}</h3>
+                  <p className="text-sm text-gray-400">{user.email}</p>
+                </div>
+              </div>
+              <StatusBadge status={user.status} />
             </div>
-            <div>
-              <h3 className="font-bold text-gray-900">{user.name}</h3>
-              <p className="text-sm text-gray-400">{user.email}</p>
+ 
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-[11px] text-gray-400 uppercase font-semibold mb-1">Institution</p>
+                  <p className="text-sm font-medium text-gray-800">{user.institution || "—"}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-[11px] text-gray-400 uppercase font-semibold mb-1">Date demande</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {user.submittedAt
+                      ? new Date(user.submittedAt).toLocaleDateString("fr-FR", {
+                          day: "numeric", month: "long", year: "numeric"
+                        })
+                      : new Date(user.createdAt).toLocaleDateString("fr-FR", {
+                          day: "numeric", month: "long", year: "numeric"
+                        })
+                    }
+                  </p>
+                </div>
+              </div>
+ 
+              {user.chercheur && (
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                  <h4 className="text-sm font-semibold text-blue-900 mb-2">Informations chercheur</h4>
+                  <div className="space-y-2 text-sm">
+                    {user.chercheur.specialty && (
+                      <p className="text-blue-800">🔬 {user.chercheur.specialty}</p>
+                    )}
+                    {user.chercheur.institution && (
+                      <p className="text-blue-800">🏛️ {user.chercheur.institution.name}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-          <StatusBadge status={user.status} />
-        </div>
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-[11px] text-gray-400 uppercase font-semibold mb-1">Institution</p>
-              <p className="text-sm font-medium text-gray-800">{user.institution || "—"}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-3">
-              <p className="text-[11px] text-gray-400 uppercase font-semibold mb-1">Date demande</p>
-              <p className="text-sm font-medium text-gray-800">
-                {user.submittedAt 
-                  ? new Date(user.submittedAt).toLocaleDateString("fr-FR", { 
-                      day: "numeric", month: "long", year: "numeric" 
-                    })
-                  : new Date(user.createdAt).toLocaleDateString("fr-FR", {
-                      day: "numeric", month: "long", year: "numeric"
-                    })
-                }
-              </p>
-            </div>
-          </div>
-
-          {user.chercheur && (
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-              <h4 className="text-sm font-semibold text-blue-900 mb-2">Informations chercheur</h4>
-              <div className="space-y-2 text-sm">
-                {user.chercheur.specialty && (
-                  <p className="text-blue-800">🔬 {user.chercheur.specialty}</p>
-                )}
-                {user.chercheur.institution && (
-                  <p className="text-blue-800">🏛️ {user.chercheur.institution.name}</p>
-                )}
+ 
+            <button
+              onClick={() => setStep("changePassword")}
+              className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
+            >
+              <KeyRound className="w-4 h-4" />
+              Changer le mot de passe
+            </button>
+ 
+            <button
+              onClick={handleClose}
+              className="mt-2 w-full py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              Fermer
+            </button>
+          </>
+        ) : (
+          /* ─── VUE : RÉINITIALISATION DU MOT DE PASSE ────── */
+          <>
+            <div className="flex items-center gap-3 mb-6">
+              <button
+                onClick={goToDetails}
+                className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 text-gray-500" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center flex-shrink-0">
+                  <KeyRound className="w-5 h-5 text-blue-700" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Réinitialiser le mot de passe</h3>
+                  <p className="text-xs text-gray-400">
+                    Pour <strong>{user.name}</strong> ({user.email})
+                  </p>
+                </div>
               </div>
             </div>
-          )}
-        </div>
-
-        <button
-          onClick={onClose}
-          className="mt-6 w-full py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-        >
-          Fermer
-        </button>
+ 
+            {pwdError && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p className="text-sm">{pwdError}</p>
+              </div>
+            )}
+ 
+            {pwdSuccess && (
+              <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-start gap-3">
+                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p className="text-sm">Mot de passe réinitialisé avec succès.</p>
+              </div>
+            )}
+ 
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Nouveau mot de passe <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type={showNew ? "text" : "password"}
+                    required
+                    autoFocus
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {newPassword.length > 0 && !passwordCheck.isValid && (
+                  <ul className="mt-1.5 space-y-0.5">
+                    {passwordCheck.errors.map((err) => (
+                      <li key={err} className="text-[11px] text-amber-600">• {err}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+ 
+              <button
+                type="submit"
+                disabled={!passwordCheck.isValid || saving}
+                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:bg-blue-300 transition-all flex items-center justify-center gap-2 shadow-sm shadow-blue-200"
+              >
+                {saving ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-5 h-5" />
+                )}
+                Réinitialiser le mot de passe
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   )
@@ -317,6 +475,7 @@ const [validateModal, setValidateModal] = useState<{
         })),
         ...allUsers.map((u: any) => ({
           ...u,
+          role: 'CHERCHEUR',
           submittedAt: u.createdAt,
           institution: u.chercheur?.institution?.name || "—"
         }))

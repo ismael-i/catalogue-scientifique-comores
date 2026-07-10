@@ -224,6 +224,7 @@ const PublicationListItem = ({ publication }: PublicationListItemProps) => {
     journal,
     description,
     keywords,
+    othersAuthors
   } = publication
 
   return (
@@ -255,7 +256,13 @@ const PublicationListItem = ({ publication }: PublicationListItemProps) => {
           {/* Authors */}
           <p className="text-xs text-slate-600 mb-1">
     
-            {authors.map((a) => a.name).join(', ')}
+            {authors.map((a) => a.name).join(', ')} 
+            {othersAuthors && othersAuthors.length > 0 && (
+                            <>
+                              {authors && authors.length > 0 ? ", " : ""}
+                              {othersAuthors.join(", ")}
+                            </>
+                          )}
           </p>
 
           {/* Journal */}

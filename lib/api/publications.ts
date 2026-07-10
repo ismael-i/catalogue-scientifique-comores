@@ -24,6 +24,7 @@ export interface PublicationData {
   authors: PublicationAuthor[]
   keywords: { id: string; keyword: string }[]
   institutionAcronym?: string
+  othersAuthors? : string []
 }
 
 export const publicationsApi = {
@@ -37,7 +38,7 @@ export const publicationsApi = {
   create: (data: {
     title: string; domain: string; year: number; type: string; journal: string;
     description: string; laboratoireId?: string; authorIds: string[]; keywords: string[];
-    institutionAcronym?: string; pdfUrl?: string
+    institutionAcronym?: string; pdfUrl?: string; othersAuthors? : string[]
   }, token: string) => api.post("/publications", data, { token }),
 
   update: (id: string, data: any, token: string) => api.put(`/publications/${id}`, data, { token }),

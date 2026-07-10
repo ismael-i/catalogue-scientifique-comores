@@ -164,6 +164,12 @@ const PublicationDetailPage = () => {
                     )}
                   </span>
                 ))}
+                {publication.othersAuthors && publication.othersAuthors.length > 0 && (
+                  <>
+                    {publication.authors && publication.authors.length > 0 ? ", " : ""}
+                    {publication.othersAuthors.join(", ")}
+                  </>
+                )}
               </span>
             </div>
 

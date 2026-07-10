@@ -42,7 +42,9 @@ export default function ModifierPublicationPage() {
     domain: "",
     type: "",
     laboratoireId: "",
-    institutionAcronym: ""
+    institutionAcronym: "",
+    othersAuthors: [] as string []
+    
   })
   const [authorIds, setAuthorIds] = useState<string[]>([])
   const [keywords, setKeywords] = useState<string[]>([])
@@ -68,7 +70,7 @@ export default function ModifierPublicationPage() {
   const [searchChercheur, setSearchChercheur] = useState("")
   const [filteredChercheurs, setFilteredChercheurs] = useState<ChercheurCard[]>([])
   const [showChercheurDropdown, setShowChercheurDropdown] = useState(false)
-
+   const [newOtherAuthors, setNewOtherAuthors] = useState("")
   // ─── Auth ──────────────────────────────────────────
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "ADMIN")) {
@@ -102,7 +104,8 @@ export default function ModifierPublicationPage() {
           domain: pubData.domain || "",
           type: pubData.type || "",
           laboratoireId: pubData.laboratoire?.acronym ? "" : "", // l'API renvoie un objet laboratoire, il nous faut l'ID
-          institutionAcronym: pubData.institutionAcronym || ""
+          institutionAcronym: pubData.institutionAcronym || "",
+          othersAuthors: pubData.othersAuthors || []
         })
         // Récupérer l'ID du laboratoire à partir de l'objet
         if (pubData.laboratoire?.acronym) {
@@ -204,6 +207,18 @@ export default function ModifierPublicationPage() {
     setPdfAction(PdfAction.KEEP)
   }
 
+    const addOtherAuthor = () => {
+    const val = newOtherAuthors.trim()
+    if (val && !form.othersAuthors.includes(val)) {
+      setForm(prev => ({ ...prev, othersAuthors: [...prev.othersAuthors, val] }))
+      setNewOtherAuthors("")
+    }
+  }
+
+  const removeOtherAuthor = (item: string) => {
+    setForm(prev => ({ ...prev, othersAuthors: prev.othersAuthors.filter(p => p !== item) }))
+  }
+
   // ─── Validation ────────────────────────────────────
   const validate = (): boolean => {
     const errs: Record<string, string> = {}
@@ -240,7 +255,8 @@ export default function ModifierPublicationPage() {
       form.laboratoireId !== (publication.laboratoire?.acronym ? "" : "") || // simplification
       form.institutionAcronym !== (publication.institutionAcronym || "") ||
       JSON.stringify(currentAuthors) !== JSON.stringify(originalAuthors) ||
-      JSON.stringify(currentKeywords) !== JSON.stringify(originalKeywords)
+      JSON.stringify(currentKeywords) !== JSON.stringify(originalKeywords) ||
+      JSON.stringify(form.othersAuthors) !== JSON.stringify(publication.othersAuthors || [])
     )
   }
 
@@ -268,7 +284,8 @@ export default function ModifierPublicationPage() {
         laboratoireId: form.laboratoireId,
         institutionAcronym: form.institutionAcronym.trim() || undefined,
         authorIds,
-        keywords
+        keywords,
+        othersAuthors: form.othersAuthors,
       }
 
       await publicationsApi.update(id, payload, token)
@@ -431,6 +448,7 @@ export default function ModifierPublicationPage() {
             <Users className="w-4 h-4 text-gray-400" /> Auteurs <span className="text-red-500">*</span>
           </h2>
           <div className="relative">
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Chercheur</label>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
@@ -468,6 +486,23 @@ export default function ModifierPublicationPage() {
               <p className="text-xs text-gray-400">Aucun auteur sélectionné</p>
             )}
           </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Autres auteurs</label>
+                      <div className="flex gap-2 mb-2">
+                        <input type="text" value={newOtherAuthors} onChange={e => setNewOtherAuthors(e.target.value)} placeholder="Ajouter un auteur" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 outline-none" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addOtherAuthor())} />
+                        <button type="button" onClick={addOtherAuthor} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Plus className="w-4 h-4" /></button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {form.othersAuthors.map(p => (
+                          <span key={p} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-purple-700 text-xs rounded-lg border border-purple-100">
+                            {p}
+                            <button type="button" onClick={() => removeOtherAuthor(p)}><X className="w-3 h-3" /></button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  
+          
         </div>
 
         {/* ─── Mots-clés ────────────────────────────────── */}

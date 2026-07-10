@@ -2,6 +2,7 @@ import { Newspaper } from "lucide-react";
 import { ArticleCardProps } from "@/types/article";
 import { ArticleData } from "@/lib/api/articles";
 import { getFileUrl } from "@/lib/utils/fileUrl";
+import Image from "next/image";
 
 interface ArticleCardProp{
   article :ArticleData
@@ -15,7 +16,7 @@ export function ArticleCard({article}: ArticleCardProp) {
       <div className="h-48 overflow-hidden bg-slate-100 flex items-center justify-center">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={getFileUrl(imageUrl)}
             alt={imageAlt ?? ''}
             className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"

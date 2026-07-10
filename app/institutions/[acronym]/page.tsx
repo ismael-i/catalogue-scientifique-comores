@@ -23,6 +23,7 @@ import { InstitutionDetail, institutionsApi } from '@/lib/api/institutions'
 import { ApiError } from '@/lib/api/client'
 import { PublicationData, publicationsApi } from '@/lib/api/publications'
 import { getFileUrl } from '@/lib/utils/fileUrl'
+import Image from 'next/image'
 
 const LABS_PER_PAGE = 6
 const CHERCHEURS_PER_PAGE = 8
@@ -169,7 +170,7 @@ const chercheurs = useMemo(
               >
                 {institution.logo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={getFileUrl(institution.logo)}
                     alt={`Logo ${institution.acronym}`}
                     className="w-full h-full object-contain p-1"
@@ -325,7 +326,7 @@ const LabRow = ({ lab }: LabRowProps) => (
     <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
       {lab.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={getFileUrl(lab.logo)}
           alt={lab.acronym}
         />
@@ -358,7 +359,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
       {chercheur.photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={getFileUrl(chercheur.photoUrl)}
           alt={chercheur.name}
           className="w-full h-full object-cover"

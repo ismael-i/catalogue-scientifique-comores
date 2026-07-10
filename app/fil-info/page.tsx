@@ -19,6 +19,7 @@ import { Pagination } from '@/components/Pagination'
 import { ArticleData, articlesApi } from '@/lib/api/articles'
 import { ApiError } from '@/lib/api/client'
 import { getFileUrl } from '@/lib/utils/fileUrl'
+import Image from 'next/image'
 
 const FETCH_DELAY_MS = 500
 const ITEMS_PER_PAGE = 9
@@ -188,7 +189,7 @@ const FilInfoCard = ({ article }: FilInfoCardProps) => {
       <div className="h-52 w-full overflow-hidden bg-slate-100 flex items-center justify-center flex-shrink-0">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={getFileUrl(imageUrl)}
             alt={imageAlt ?? title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"

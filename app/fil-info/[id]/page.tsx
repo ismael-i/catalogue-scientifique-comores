@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 import { useLoading } from '@/components/LoadingProvider'
 import { ApiError } from '@/lib/api/client'
 import { getFileUrl } from '@/lib/utils/fileUrl'
+import Image from 'next/image'
 
 const FilInfoDetailPage = () => {
   const [article, setArticle] = useState<ArticleData | null>(null)
@@ -133,7 +134,7 @@ const FilInfoDetailPage = () => {
           <div className="rounded-xl overflow-hidden mb-8 bg-slate-100">
             {article.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={getFileUrl(article.imageUrl)}
                 alt={article.imageAlt ?? article.title}
                 className="w-full h-auto max-h-[520px] object-cover"

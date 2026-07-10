@@ -3,6 +3,7 @@ import type { ViewMode } from '@/types'
 import Link from 'next/link';
 import { ChercheurCard as ChercheurCardType , ChercheurDetail } from '@/lib/api/chercheurs';
 import { getFileUrl } from '@/lib/utils/fileUrl'
+import Image from 'next/image';
 
 interface ChercheurCardProps {
   chercheur: ChercheurCardType | ChercheurDetail
@@ -12,7 +13,7 @@ interface ChercheurCardProps {
 function Avatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
   if (photoUrl) {
     return (
-      <img
+      <Image
         src={getFileUrl(photoUrl)}
         alt={name}
         className="w-full h-full object-cover rounded-full"

@@ -129,6 +129,13 @@ export default function PublicationDetailPage() {
               </div>
             ))}
           </div>
+          {publication.othersAuthors && publication.othersAuthors.length > 0 && (
+            <p className="mt-3 text-xs text-gray-500">
+              <span className="font-semibold text-gray-600">Autres auteurs : </span>
+              {publication.othersAuthors.join(", ")}
+            </p>
+          )}  
+
         </div>
 
         {/* Mots-clés */}

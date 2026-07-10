@@ -5,6 +5,7 @@ import type { Chercheur, ViewMode } from '@/types'
 import Link from 'next/link'
 import { ChercheurCard } from '@/lib/api/chercheurs'
 import { getFileUrl } from '@/lib/utils/fileUrl'
+import Image from 'next/image'
 
 interface ChercheurCardProps {
   chercheur: ChercheurCard
@@ -20,7 +21,7 @@ export function ResearcherCard({ chercheur }: { chercheur: ChercheurCard }){
         {/* Avatar */}
         <div className="flex-shrink-0">
           {photoUrl? (
-            <img 
+            <Image 
               src={getFileUrl(photoUrl)}
               alt={name}
               className="w-12 h-12 rounded-full object-cover"

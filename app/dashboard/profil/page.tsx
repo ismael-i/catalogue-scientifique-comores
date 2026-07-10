@@ -8,6 +8,7 @@ import { getFileUrl } from "@/lib/utils/fileUrl"
 import { ApiError } from "@/lib/api/client"
 import Link from "next/link"
 import { ArrowLeft, Save, Camera, X, Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import { ChangePasswordDialog } from "./ Changepassworddialog"
 
 export default function ProfilChercheurPage() {
   const { user, token } = useAuth()
@@ -25,6 +26,8 @@ export default function ProfilChercheurPage() {
   // Fiche PDF
   const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [pdfName, setPdfName] = useState<string | null>(null)
+
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   useEffect(() => {
     if (token && user?.chercheurId) {
@@ -100,6 +103,8 @@ export default function ProfilChercheurPage() {
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-gray-500"><ArrowLeft className="w-4 h-4" /> Retour</Link>
       </div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Mon profil Chercheur</h1>
+
+      <button onClick={() => setShowChangePassword(true)}className="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:bg-blue-300 flex items-center gap-2">Changer mon mot de passe</button>
 
       {success && (
         <div className="mb-6 bg-green-50 text-green-700 p-4 rounded-2xl flex items-center gap-3">
@@ -199,6 +204,12 @@ export default function ProfilChercheurPage() {
           </button>
         </div>
       </form>
+
+      <ChangePasswordDialog
+        show={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+        onSuccess={() => {/* toast, refresh, etc. */}}
+      />
     </div>
   )
 }
