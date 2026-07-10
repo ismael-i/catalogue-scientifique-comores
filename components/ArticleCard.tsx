@@ -19,6 +19,7 @@ export function ArticleCard({article}: ArticleCardProp) {
           <Image
             src={getFileUrl(imageUrl)}
             alt={imageAlt ?? ''}
+            fill={true}
             className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"
           />
         ) : (

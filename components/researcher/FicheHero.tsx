@@ -15,7 +15,7 @@ function HeroAvatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
   return (
     <div className="w-24 h-24 rounded-xl bg-slate-100 border border-slate-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
       {photoUrl ? (
-        <Image src={getFileUrl(photoUrl)} alt={name} className="w-full h-full object-cover" />
+        <Image src={getFileUrl(photoUrl)} alt={name} fill={true}  className="w-full h-full object-cover" />
       ) : (
         <Users className="w-10 h-10 text-slate-400" strokeWidth={1.2} />
       )}

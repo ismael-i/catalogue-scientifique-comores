@@ -137,6 +137,7 @@ const FilInfoDetailPage = () => {
               <Image
                 src={getFileUrl(article.imageUrl)}
                 alt={article.imageAlt ?? article.title}
+                fill={true}
                 className="w-full h-auto max-h-[520px] object-cover"
               />
             ) : (
