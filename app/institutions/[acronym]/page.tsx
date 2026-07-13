@@ -164,16 +164,17 @@ const chercheurs = useMemo(
           <div className="max-w-6xl mx-auto px-6 pt-10 pb-10">
             <div className="flex items-center gap-4 mb-5">
               <div
-                className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden ${
+                className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative ${
                   institution.logoBg ?? 'bg-slate-100'
                 }`}
               >
                 {institution.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <Image
                     src={getFileUrl(institution.logo)}
                     alt={`Logo ${institution.acronym}`}
-                    className="w-full h-full object-contain p-1"
+                    fill
+                    className="object-contain p-1"
+                    sizes="56px"
                   />
                 ) : (
                   <InstIcon className="w-7 h-7 text-slate-400" />
@@ -323,12 +324,14 @@ interface LabRowProps {
 
 const LabRow = ({ lab }: LabRowProps) => (
   <div className="flex items-start gap-3">
-    <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+    <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
       {lab.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <Image
           src={getFileUrl(lab.logo)}
           alt={lab.acronym}
+          fill
+          className="object-cover"
+          sizes="36px"
         />
       ) : (
         <FlaskConical className="w-4 h-4 text-blue-500" />
@@ -356,13 +359,14 @@ interface ChercheurRowProps {
 
 const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
   <div className="flex items-start gap-3">
-    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
       {chercheur.photoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <Image
           src={getFileUrl(chercheur.photoUrl)}
           alt={chercheur.name}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          sizes="36px"
         />
       ) : (
         <User className="w-4 h-4 text-slate-400" />
@@ -385,7 +389,15 @@ const PublicationRow = ({ publication }: PublicationRowProps) => (
       {publication.title}
     </p>
     <p className="text-xs text-slate-500">
-      {publication.authors.join(', ')} ({publication.year})
+      {publication.authors.map((a) => a.name).join(', ')} 
+           {publication.othersAuthors && publication.othersAuthors.length > 0 && (
+                            <>
+                              {publication.authors && publication.authors.length > 0 ? ", " : ""}
+                              {publication.othersAuthors.join(", ")}
+                            </>
+                          )}
+      
+       ({publication.year})
     </p>
   </Link>
 )

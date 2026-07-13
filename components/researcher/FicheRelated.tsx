@@ -18,19 +18,21 @@ function MiniCard({ chercheur }: MiniCardProps) {
       <div className="group bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
 
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden">
-          {chercheur.photoUrl ? (
-            <Image
-              src={getFileUrl(chercheur.photoUrl)}
-              alt={chercheur.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Users className="w-5 h-5 text-slate-400" strokeWidth={1.5} />
-            </div>
-          )}
-        </div>
+       <div className="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden relative">
+        {chercheur.photoUrl ? (
+          <Image
+            src={getFileUrl(chercheur.photoUrl)}
+            alt={chercheur.name}
+            fill
+            className="object-cover"
+            sizes="40px"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Users className="w-5 h-5 text-slate-400" strokeWidth={1.5} />
+          </div>
+        )}
+      </div>
 
         {/* Infos */}
         <div className="min-w-0">

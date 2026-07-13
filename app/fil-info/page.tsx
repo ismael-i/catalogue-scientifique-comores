@@ -186,14 +186,15 @@ const FilInfoCard = ({ article }: FilInfoCardProps) => {
       className="group flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-blue-300 hover:shadow-sm transition-all h-full"
     >
       {/* Cover */}
-      <div className="h-52 w-full overflow-hidden bg-slate-100 flex items-center justify-center flex-shrink-0">
+      <div className="h-52 w-full overflow-hidden bg-slate-100 flex items-center justify-center flex-shrink-0 relative">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <Image
             src={getFileUrl(imageUrl)}
             alt={imageAlt ?? title}
-            fill={true}
+            fill
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-cyan-50 to-sky-100 flex items-center justify-center">

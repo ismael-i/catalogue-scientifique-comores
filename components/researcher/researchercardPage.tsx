@@ -16,7 +16,8 @@ function Avatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
       <Image
         src={getFileUrl(photoUrl)}
         alt={name}
-        fill={true}
+        width={48}
+        height={48}
         className="w-full h-full object-cover rounded-full"
       />
     )

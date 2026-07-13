@@ -13,14 +13,14 @@ export function ArticleCard({article}: ArticleCardProp) {
   return (
     <div className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col">
       {/* Image */}
-      <div className="h-48 overflow-hidden bg-slate-100 flex items-center justify-center">
+     <div className="h-48 overflow-hidden bg-slate-100 flex items-center justify-center relative">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <Image
             src={getFileUrl(imageUrl)}
             alt={imageAlt ?? ''}
-            fill={true}
-            className="w-full h-full object-cover group-hover:blue-500 transition-transform duration-300"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-cyan-50 to-sky-100 flex items-center justify-center">

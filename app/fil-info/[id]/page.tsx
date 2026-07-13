@@ -131,21 +131,23 @@ const FilInfoDetailPage = () => {
           )}
 
           {/* Cover image */}
-          <div className="rounded-xl overflow-hidden mb-8 bg-slate-100">
-            {article.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <Image
-                src={getFileUrl(article.imageUrl)}
-                alt={article.imageAlt ?? article.title}
-                fill={true}
-                className="w-full h-auto max-h-[520px] object-cover"
-              />
-            ) : (
-              <div className="w-full h-[420px] bg-gradient-to-br from-cyan-50 to-sky-100 flex items-center justify-center">
-                <Newspaper className="w-16 h-16 text-sky-300" />
-              </div>
-            )}
-          </div>
+        <div className="rounded-xl overflow-hidden mb-8 bg-slate-100">
+          {article.imageUrl ? (
+            <Image
+              src={getFileUrl(article.imageUrl)}
+              alt={article.imageAlt ?? article.title}
+              width={1200}
+              height={520}
+              className="w-full h-auto max-h-[520px] object-cover"
+              sizes="(max-width: 768px) 100vw, 800px"
+              priority
+            />
+          ) : (
+            <div className="w-full h-[420px] bg-gradient-to-br from-cyan-50 to-sky-100 flex items-center justify-center">
+              <Newspaper className="w-16 h-16 text-sky-300" />
+            </div>
+          )}
+        </div>
 
           {/* Body */}
           <div className="flex flex-col gap-5 text-sm text-slate-600 leading-relaxed mb-8">
