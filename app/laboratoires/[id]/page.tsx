@@ -20,6 +20,7 @@ import { useLoading } from '@/components/LoadingProvider'
 import { ApiError } from '@/lib/api/client'
 import { getFileUrl } from '@/lib/utils/fileUrl'
 import { ChercheurCard } from '@/lib/api/chercheurs'
+import { PublicationData } from '@/lib/api/publications'
 
 const categorieBadgeClass: Record<string, string> = {
   Environnement: 'bg-sky-100 text-sky-700',
@@ -380,7 +381,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
 )
 
 interface PublicationRowProps {
-  publication: Publication
+  publication: PublicationData
 }
 
 const PublicationRow = ({ publication }: PublicationRowProps) => (
@@ -392,7 +393,14 @@ const PublicationRow = ({ publication }: PublicationRowProps) => (
       {publication.title}
     </p>
     <p className="text-xs text-slate-500">
-      {publication.authors.join(', ')}
+      {publication.authors.map((a) => a.name).join(', ')} 
+        {publication.othersAuthors && publication.othersAuthors.length > 0 && (
+                            <>
+                              {publication.authors && publication.authors.length > 0 ? ", " : ""}
+                              {publication.othersAuthors.join(", ")}
+        </>
+      )}
+      
       <span className="mx-1.5 text-slate-300">•</span>
       {publication.year}
     </p>
