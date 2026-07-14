@@ -18,8 +18,8 @@ import { ApiError } from '@/lib/api/client'
 
 const ALL_DOMAINS = '' as const
 const ALL_YEARS = '' as const
-const FETCH_DELAY_MS = 1200
-const ITEMS_PER_PAGE = 8
+const FETCH_DELAY_MS = 600
+const ITEMS_PER_PAGE = 12
 
 const PublicationsPage = () => {
   const [items, setItems] = useState<PublicationData[]>([])
@@ -37,6 +37,7 @@ const PublicationsPage = () => {
     try {
       const result = await publicationsApi.findAll({
         page,
+        limit: 12
       })
       setItems(result.data)
    
@@ -48,12 +49,8 @@ const PublicationsPage = () => {
   }, [ page])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchPubs()
-      setLoading(false)
-    }, FETCH_DELAY_MS)
-    return () => clearTimeout(timer)
-  }, [])
+  fetchPubs()
+}, [fetchPubs])
 
   const years = useMemo<number[]>(() => {
     const set = new Set<number>(items.map((p) => p.year))
