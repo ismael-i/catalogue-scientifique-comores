@@ -45,7 +45,7 @@ const PublicationsPage = () => {
     } finally {
       setLoading(false)
     }
-  }, [ page])
+  }, [])
 
   useEffect(() => {
   fetchPubs()
