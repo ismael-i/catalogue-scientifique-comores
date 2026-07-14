@@ -30,6 +30,11 @@ export default function AdminInstitutionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+// ─── Pagination ──────────────────────────────────────────
+const [laboratoiresPage, setLaboratoiresPage] = useState(1)
+const [chercheursPage, setChercheursPage] = useState(1)
+const ITEMS_PER_PAGE = 10
+
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "ADMIN")) {
       router.push("/auth/login")
@@ -46,10 +51,16 @@ export default function AdminInstitutionDetailPage() {
     }
   }, [token, id])
 
+  useEffect(() => {
+  setLaboratoiresPage(1)
+  setChercheursPage(1)
+}, [id])
+
+
+
   if (authLoading || loading) {
     return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
   }
-  console.log(institution)
 
   if (error || !institution) {
     return (
@@ -62,6 +73,20 @@ export default function AdminInstitutionDetailPage() {
       </div>
     )
   }
+  const totalLaboratoires = institution.laboratoires?.length || 0
+  const totalLaboratoiresPages = Math.max(1, Math.ceil(totalLaboratoires / ITEMS_PER_PAGE))
+  const paginatedLaboratoires = (institution.laboratoires || []).slice(
+    (laboratoiresPage - 1) * ITEMS_PER_PAGE,
+    laboratoiresPage * ITEMS_PER_PAGE
+  )
+
+  const totalChercheurs = institution.chercheurs?.length || 0
+  const totalChercheursPages = Math.max(1, Math.ceil(totalChercheurs / ITEMS_PER_PAGE))
+  const paginatedChercheurs = (institution.chercheurs || []).slice(
+    (chercheursPage - 1) * ITEMS_PER_PAGE,
+    chercheursPage * ITEMS_PER_PAGE
+  )
+
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -102,91 +127,166 @@ export default function AdminInstitutionDetailPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-50">
             <h3 className="text-sm font-bold text-gray-900 uppercase flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-gray-400" /> Laboratoires ({institution.laboratoires?.length || 0})
+              <FlaskConical className="w-4 h-4 text-gray-400" /> Laboratoires ({totalLaboratoires})
             </h3>
           </div>
-          {institution.laboratoires && institution.laboratoires.length > 0 ? (
-            <div className="divide-y divide-gray-50">
-              {institution.laboratoires.map((labo: any) => (
-                <Link key={labo.id} href={`/admin/laboratoires/${labo.id}`} className="flex items-center justify-between px-6 py-4 hover:bg-blue-50/30 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                       {labo.logo ? (
-                        <img
-                          src={getFileUrl(labo.logo)}
-                          alt={labo.acronym}
-                          className="w-8 h-8 object-contain rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <FlaskConical className="w-4 h-4 text-blue-500" strokeWidth={1.8} />
-                          </div>
-                        )}
+          {paginatedLaboratoires.length > 0 ? (
+            <>
+              <div className="divide-y divide-gray-50">
+                {paginatedLaboratoires.map((labo: any) => (
+                  <Link key={labo.id} href={`/admin/laboratoires/${labo.id}`} className="flex items-center justify-between px-6 py-4 hover:bg-blue-50/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        {labo.logo ? (
+                          <img
+                            src={getFileUrl(labo.logo)}
+                            alt={labo.acronym}
+                            className="w-8 h-8 object-contain rounded-lg"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <FlaskConical className="w-4 h-4 text-blue-500" strokeWidth={1.8} />
+                            </div>
+                          )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{labo.acronym}</p>
+                        <p className="text-xs text-gray-500">{labo.name}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{labo.acronym}</p>
-                      <p className="text-xs text-gray-500">{labo.name}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300" />
-                </Link>
-              ))}
-            </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </Link>
+                ))}
+              </div>
+              <PaginationControls
+                currentPage={laboratoiresPage}
+                totalPages={totalLaboratoiresPages}
+                onPageChange={setLaboratoiresPage}
+              />
+            </>
           ) : (
             <div className="py-8 text-center text-sm text-gray-400">Aucun laboratoire rattaché</div>
           )}
         </div>
 
         {/* Chercheurs */}
+        {/* Chercheurs */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-50">
             <h3 className="text-sm font-bold text-gray-900 uppercase flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-400" /> Chercheurs ({institution.chercheurs?.length || 0})
+              <Users className="w-4 h-4 text-gray-400" /> Chercheurs ({totalChercheurs})
             </h3>
           </div>
-          {institution.chercheurs && institution.chercheurs.length > 0 ?  (
-            <div className="divide-y divide-gray-50">
-              {institution.chercheurs.map((chercheur: any) => (
-                <Link key={chercheur.id} href={`/admin/chercheurs/${chercheur.id}`} className="flex items-center justify-between px-6 py-4 hover:bg-blue-50/30 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center">
-                     {chercheur.photoUrl ? (
-                       <img
-                       src={getFileUrl(chercheur.photoUrl)}
-                       alt={chercheur.name}
-                       className="w-9 h-9 rounded-xl object-cover"
-                       />
-                      ) : (
-                        <span className="text-blue-700 text-xs font-bold">
-                          {chercheur.name.charAt(0)}
-                        </span>
-                        )}
+          {paginatedChercheurs.length > 0 ? (
+            <>
+              <div className="divide-y divide-gray-50">
+                {paginatedChercheurs.map((chercheur: any) => (
+                  <Link key={chercheur.id} href={`/admin/chercheurs/${chercheur.id}`} className="flex items-center justify-between px-6 py-4 hover:bg-blue-50/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center">
+                      {chercheur.photoUrl ? (
+                        <img
+                        src={getFileUrl(chercheur.photoUrl)}
+                        alt={chercheur.name}
+                        className="w-9 h-9 rounded-xl object-cover"
+                        />
+                        ) : (
+                          <span className="text-blue-700 text-xs font-bold">
+                            {chercheur.name.charAt(0)}
+                          </span>
+                          )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{chercheur.name}</p>
+                        <p className="text-xs text-gray-500">{chercheur.specialty}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{chercheur.name}</p>
-                      <p className="text-xs text-gray-500">{chercheur.specialty}</p>
-                    </div>
-                  </div>
-                  {chercheur.email && (
-                  <button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        window.location.href = `mailto:${chercheur.email}`
-                      }}
-                      className="p-2 text-gray-400 hover:text-blue-500"
-                      title={chercheur.email}
-                    >
-                      <Mail className="w-4 h-4" />
-                    </button>
-                  )}
-                </Link>
-              ))}
-            </div>
+                    {chercheur.email && (
+                    <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          window.location.href = `mailto:${chercheur.email}`
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-500"
+                        title={chercheur.email}
+                      >
+                        <Mail className="w-4 h-4" />
+                      </button>
+                    )}
+                  </Link>
+                ))}
+              </div>
+              <PaginationControls
+                currentPage={chercheursPage}
+                totalPages={totalChercheursPages}
+                onPageChange={setChercheursPage}
+              />
+            </>
           ) : (
             <div className="py-8 text-center text-sm text-gray-400">Aucun chercheur rattaché</div>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+interface PaginationControlsProps {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}
+
+function PaginationControls({ currentPage, totalPages, onPageChange }: PaginationControlsProps) {
+  if (totalPages <= 1) return null
+
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-50 bg-gray-50/50">
+      <p className="text-xs text-gray-400">
+        Page {currentPage} sur {totalPages}
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+        >
+          Précédent
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(
+            (page) =>
+              page === 1 ||
+              page === totalPages ||
+              Math.abs(page - currentPage) <= 1
+          )
+          .map((page, idx, arr) => (
+            <span key={page} className="flex items-center">
+              {idx > 0 && arr[idx - 1] !== page - 1 && (
+                <span className="px-1 text-xs text-gray-300">…</span>
+              )}
+              <button
+                onClick={() => onPageChange(page)}
+                className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${
+                  page === currentPage
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </button>
+            </span>
+          ))}
+
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+        >
+          Suivant
+        </button>
       </div>
     </div>
   )

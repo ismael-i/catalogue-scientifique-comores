@@ -61,6 +61,10 @@ export default function AdminLaboratoireDetailPage() {
   const [deleteModal, setDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+    // ─── Pagination chercheurs ──────────────────────────────
+  const [chercheursPage, setChercheursPage] = useState(1)
+  const CHERCHEURS_PER_PAGE = 10
+
   // ─── Gestion du responsable ────────────────────────────
   const [showResponsableModal, setShowResponsableModal] = useState(false)
   const [searchResponsable, setSearchResponsable] = useState("")
@@ -95,6 +99,10 @@ export default function AdminLaboratoireDetailPage() {
   useEffect(() => {
     if (token && id) fetchLaboratoire()
   }, [token, id, fetchLaboratoire])
+  // Reset pagination quand on change de laboratoire (ex: changement d'id)
+  useEffect(() => {
+    setChercheursPage(1)
+  }, [id])
 
   // ─── Recherche de chercheurs pour responsable ──────────
   const searchChercheursForResponsable = useCallback(async (query: string) => {
@@ -179,6 +187,17 @@ export default function AdminLaboratoireDetailPage() {
   const institutionName = laboratoire?.institution?.name || "—"
   const institutionAcronym = laboratoire?.institution?.acronym || "—"
 
+  const totalChercheurs = laboratoire?.chercheurs?.length || 0
+  const totalChercheursPages = Math.max(1, Math.ceil(totalChercheurs / CHERCHEURS_PER_PAGE))
+  const paginatedChercheurs = laboratoire?.chercheurs?.slice(
+    (chercheursPage - 1) * CHERCHEURS_PER_PAGE,
+    chercheursPage * CHERCHEURS_PER_PAGE
+  ) || []
+
+  function goToChercheursPage(page: number) {
+    if (page < 1 || page > totalChercheursPages) return
+    setChercheursPage(page)
+  }
   // ─── Loading ────────────────────────────────────────────
   if (authLoading || loading) {
     return (
@@ -461,13 +480,14 @@ export default function AdminLaboratoireDetailPage() {
                 Chercheurs affiliés
               </h3>
               <span className="text-xs text-gray-400">
-                {laboratoire.chercheurs?.length || 0} chercheur{(laboratoire.chercheurs?.length || 0) > 1 ? "s" : ""}
+                {totalChercheurs} chercheur{totalChercheurs > 1 ? "s" : ""}
               </span>
             </div>
 
-            {laboratoire.chercheurs && laboratoire.chercheurs.length > 0 ? (
+            {laboratoire.chercheurs && paginatedChercheurs.length > 0 ? (
+              <>
               <div className="divide-y divide-gray-50">
-                {laboratoire.chercheurs.map((chercheur) => (
+                {paginatedChercheurs.map((chercheur) => (
                   <div
                     key={chercheur.id}
                     className="flex items-center justify-between px-6 py-4 hover:bg-blue-50/30 transition-colors group"
@@ -509,9 +529,63 @@ export default function AdminLaboratoireDetailPage() {
                         <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
+                    
                   </div>
                 ))}
               </div>
+                          {/* ─── Contrôles de pagination ────────────── */}
+              {totalChercheursPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-3 border-t border-gray-50 bg-gray-50/50">
+                  <p className="text-xs text-gray-400">
+                    Page {chercheursPage} sur {totalChercheursPages}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => goToChercheursPage(chercheursPage - 1)}
+                      disabled={chercheursPage === 1}
+                      className="px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                    >
+                      Précédent
+                    </button>
+
+                    {Array.from({ length: totalChercheursPages }, (_, i) => i + 1)
+                      .filter((page) => {
+                        // Affiche : première, dernière, et pages proches de la page actuelle
+                        return (
+                          page === 1 ||
+                          page === totalChercheursPages ||
+                          Math.abs(page - chercheursPage) <= 1
+                        )
+                      })
+                      .map((page, idx, arr) => (
+                        <React.Fragment key={page}>
+                          {idx > 0 && arr[idx - 1] !== page - 1 && (
+                            <span className="px-1 text-xs text-gray-300">…</span>
+                          )}
+                          <button
+                            onClick={() => goToChercheursPage(page)}
+                            className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${
+                              page === chercheursPage
+                                ? "bg-blue-600 text-white"
+                                : "text-gray-500 hover:bg-gray-100"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        </React.Fragment>
+                      ))}
+
+                    <button
+                      onClick={() => goToChercheursPage(chercheursPage + 1)}
+                      disabled={chercheursPage === totalChercheursPages}
+                      className="px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                    >
+                      Suivant
+                    </button>
+                  </div>
+                </div>
+              )}
+              </>
             ) : (
               <div className="py-10 text-center">
                 <Users className="w-10 h-10 text-gray-200 mx-auto mb-2" />

@@ -36,6 +36,8 @@ const LaboratoireDetailPage = () => {
   const [error, setError] = useState<string | null>(null)
   const params = useParams<{ id: string }>()
   const id = typeof params?.id === 'string' ? params.id : ''
+  const [chercheursPage, setChercheursPage] = useState(1)
+  const CHERCHEURS_PER_PAGE = 10
 
     // ─── Charger le laboratoire ────────────────────────────
   const fetchLaboratoire = useCallback(async () => {
@@ -55,6 +57,10 @@ const LaboratoireDetailPage = () => {
   useEffect(() => {
     if ( id) fetchLaboratoire()
   }, [ id, fetchLaboratoire])
+
+  useEffect(() => {
+  setChercheursPage(1)
+}, [id])
   const lab = id
     ? MOCK_LABORATOIRES.find((l) => l.id.toLowerCase() === id.toLowerCase())
     : undefined
@@ -92,6 +98,18 @@ const LaboratoireDetailPage = () => {
   // const partenariats = lab.partenariats ?? []
   const thematiquesText = (laboratoire.thematiques ?? []).join(', ')
   const badgeClass = categorieBadgeClass[laboratoire.categorie] ?? 'bg-slate-100 text-slate-700'
+
+  const totalChercheurs = laboratoire.chercheurs?.length ?? 0
+  const totalChercheursPages = Math.max(1, Math.ceil(totalChercheurs / CHERCHEURS_PER_PAGE))
+  const paginatedChercheurs = (laboratoire.chercheurs ?? []).slice(
+    (chercheursPage - 1) * CHERCHEURS_PER_PAGE,
+    chercheursPage * CHERCHEURS_PER_PAGE
+  )
+
+  function goToChercheursPage(page: number) {
+    if (page < 1 || page > totalChercheursPages) return
+    setChercheursPage(page)
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -166,21 +184,73 @@ const LaboratoireDetailPage = () => {
               )}
 
               <SectionCard
-                icon={<Users className="w-5 h-5 text-blue-500" />}
-                title={`Chercheurs affiliés (${laboratoire._count?.chercheurs })`}
-              >
-                {laboratoire._count?.chercheurs === 0 ? (
-                  <p className="text-sm text-slate-500">Aucun chercheur affilié.</p>
-                ) : (
-                  <ul className="flex flex-col gap-3">
-                    {laboratoire.chercheurs?.map((c) => (
-                      <li key={c.id}>
-                        <ChercheurRow chercheur={c} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </SectionCard>
+                  icon={<Users className="w-5 h-5 text-blue-500" />}
+                  title={`Chercheurs affiliés (${laboratoire._count?.chercheurs})`}
+                >
+                  {totalChercheurs === 0 ? (
+                    <p className="text-sm text-slate-500">Aucun chercheur affilié.</p>
+                  ) : (
+                    <>
+                      <ul className="flex flex-col gap-3">
+                        {paginatedChercheurs.map((c) => (
+                          <li key={c.id}>
+                            <ChercheurRow chercheur={c} />
+                          </li>
+                        ))}
+                      </ul>
+
+                      {totalChercheursPages > 1 && (
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                          <p className="text-xs text-slate-400">
+                            Page {chercheursPage} sur {totalChercheursPages}
+                          </p>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => goToChercheursPage(chercheursPage - 1)}
+                              disabled={chercheursPage === 1}
+                              className="px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                            >
+                              Précédent
+                            </button>
+
+                            {Array.from({ length: totalChercheursPages }, (_, i) => i + 1)
+                              .filter(
+                                (page) =>
+                                  page === 1 ||
+                                  page === totalChercheursPages ||
+                                  Math.abs(page - chercheursPage) <= 1
+                              )
+                              .map((page, idx, arr) => (
+                                <span key={page} className="flex items-center">
+                                  {idx > 0 && arr[idx - 1] !== page - 1 && (
+                                    <span className="px-1 text-xs text-slate-300">…</span>
+                                  )}
+                                  <button
+                                    onClick={() => goToChercheursPage(page)}
+                                    className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${
+                                      page === chercheursPage
+                                        ? 'bg-blue-500 text-white'
+                                        : 'text-slate-500 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    {page}
+                                  </button>
+                                </span>
+                              ))}
+
+                            <button
+                              onClick={() => goToChercheursPage(chercheursPage + 1)}
+                              disabled={chercheursPage === totalChercheursPages}
+                              className="px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                            >
+                              Suivant
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </SectionCard>
 
               <SectionCard
                 icon={<FileText className="w-5 h-5 text-blue-500" />}
