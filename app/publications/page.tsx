@@ -37,8 +37,7 @@ const PublicationsPage = () => {
     try {
       const result = await publicationsApi.findAll({
         page,
-        limit: 12
-      })
+        limit: 100      })
       setItems(result.data)
    
     } catch (err) {
