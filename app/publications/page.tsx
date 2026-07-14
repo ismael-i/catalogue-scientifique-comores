@@ -18,7 +18,7 @@ import { ApiError } from '@/lib/api/client'
 
 const ALL_DOMAINS = '' as const
 const ALL_YEARS = '' as const
-const FETCH_DELAY_MS = 600
+const FETCH_DELAY_MS = 1200
 const ITEMS_PER_PAGE = 8
 
 const PublicationsPage = () => {
