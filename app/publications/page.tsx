@@ -264,7 +264,7 @@ const PublicationListItem = ({ publication }: PublicationListItemProps) => {
           <p className="text-xs italic text-blue-500 mb-2">{journal}</p>
 
           {/* Description */}
-          <p className="text-xs text-slate-500 mb-3 leading-relaxed">{description}</p>
+          <p className="text-xs text-slate-500 mb-3 leading-relaxed line-clamp-3">{description}</p>
 
           {/* Keywords */}
           <div className="flex flex-wrap gap-1.5">
