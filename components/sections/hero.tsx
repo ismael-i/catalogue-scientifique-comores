@@ -5,9 +5,9 @@ import { ArrowRight, Users, FlaskConical, BookOpen, Building2 } from 'lucide-rea
 import Link from 'next/link'
 
 const stats = [
-  { icon: Users,        value: 243, label: 'Chercheurs'   },
+  { icon: Users,        value: 170, label: 'Chercheurs'   },
   { icon: FlaskConical, value: 30, label: 'Laboratoires' },
-  { icon: BookOpen,     value: 12, label: 'Publications'  },
+  { icon: BookOpen,     value: 21, label: 'Publications'  },
   { icon: Building2,    value: 5,  label: 'Institutions'  },
 ]
 
