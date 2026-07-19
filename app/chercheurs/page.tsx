@@ -43,7 +43,7 @@ export default function ChercheurPage() {
     const fetchInstitutions = async () => {
       try {
         const result = await institutionsApi.findAllSimple()
-        setInstitutions(result)
+        setInstitutions(Array.isArray(result.data) ? result.data : [])
       } catch (err) {
         console.error("Erreur chargement institutions", err)
       } finally {
