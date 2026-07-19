@@ -314,8 +314,8 @@ useEffect(() => {
       return
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setPdfError("Le PDF ne doit pas dépasser 10MB")
+    if (file.size > 20 * 1024 * 1024) {
+      setPdfError("Le PDF ne doit pas dépasser 20MB")
       return
     }
 

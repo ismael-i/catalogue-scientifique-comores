@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { Search, Filter, LayoutGrid, List, AlertCircle } from 'lucide-react'
-import type { ViewMode } from '@/types'
+import type { Institution, ViewMode } from '@/types'
 import { ChercheurCard } from '@/components/researcher/researchercardPage'
 import { ChercheurSkeletonList } from '@/components/ChercheurSkeleton'
 import { Pagination } from '@/components/Pagination'
@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { ChercheurCard as Chercheur, chercheursApi } from '@/lib/api/chercheurs'
 import { ApiError } from '@/lib/api/client'
+import { InstitutionData, institutionsApi } from '@/lib/api/institutions'
 
 const ITEMS_PER_PAGE = 12
 
@@ -33,7 +34,26 @@ export default function ChercheurPage() {
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: ITEMS_PER_PAGE })
   const [error, setError]           = useState<string | null>(null)
 
-  // ── Fetch (dépend de page + institution, qui sont gérés serveur) ───
+    // ── Liste des institutions (pour le filtre) ─────────────────────
+  const [institutions, setInstitutions] = useState<InstitutionData[]>([])
+  const [institutionsLoading, setInstitutionsLoading] = useState(true)
+
+
+    useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const result = await institutionsApi.findAllSimple()
+        setInstitutions(result)
+      } catch (err) {
+        console.error("Erreur chargement institutions", err)
+      } finally {
+        setInstitutionsLoading(false)
+      }
+    }
+    fetchInstitutions()
+  }, [])
+
+ // ── Fetch chercheurs ─────────────────────────────────────────────
   const fetchChercheurs = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -41,7 +61,7 @@ export default function ChercheurPage() {
       const result = await chercheursApi.findAll({
         page,
         limit: ITEMS_PER_PAGE,
-        institution: institution || undefined,
+        institution: institution || undefined, // on envoie bien l'ID
         search: search || undefined,
       })
       setChercheurs(result.data)
@@ -57,7 +77,6 @@ export default function ChercheurPage() {
     fetchChercheurs()
   }, [fetchChercheurs])
 
-  // Reset page si les filtres changent
   useEffect(() => { setPage(1) }, [search, institution])
 
   return (
@@ -98,7 +117,7 @@ export default function ChercheurPage() {
           />
         </div>
 
-        {/* Filtre institution */}
+       {/* Filtre institution */}
         <div className="flex items-center gap-3 mb-8">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Filter className="w-4 h-4" />
@@ -107,11 +126,13 @@ export default function ChercheurPage() {
           <select
             value={institution}
             onChange={(e) => setInstitution(e.target.value)}
-            className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+            disabled={institutionsLoading}
+            className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer disabled:opacity-50"
           >
-            {INSTITUTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
+            <option value="">Toutes les institutions</option>
+            {institutions.map((inst) => (
+              <option key={inst.id} value={inst.id}>
+                {inst.acronym} – {inst.name}
               </option>
             ))}
           </select>

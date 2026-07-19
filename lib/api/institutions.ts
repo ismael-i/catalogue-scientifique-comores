@@ -5,7 +5,7 @@ export interface InstitutionData {
   id: string
   acronym: string
   name: string
-  description: string
+  description?: string
   logo?: string
   logoBg?: string
   _count?: { chercheurs: number; laboratoires: number }

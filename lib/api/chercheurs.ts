@@ -7,9 +7,9 @@ export interface ChercheurCard {
   specialty: string
   faculty?: string
   institutionName?: string
-  institution?: { acronym: string; name: string }
+  institution?: {id: string; acronym: string; name: string }
   laboratoireName?: string
-  laboratoire?: { acronym: string; name: string }
+  laboratoire?: { id: string; acronym: string; name: string }
 }
 
 export interface ChercheurDetail extends ChercheurCard {

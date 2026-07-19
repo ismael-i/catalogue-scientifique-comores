@@ -21,7 +21,7 @@ export interface Laboratoire {
 export interface Institution {
   acronym: string;
   name: string;
-  description: string;
+  description?: string;
   logo?: string; // URL optionnelle du logo
   logoBg?: string; // couleur de fond optionnelle pour le placeholder logo (classe Tailwind)
 }
