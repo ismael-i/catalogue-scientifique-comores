@@ -8,6 +8,7 @@ export type LabDomain =
   | 'Lettres'
 
 export interface Laboratoire {
+  id: string ;
   acronym: string;
   name: string;
   description: string;

@@ -24,6 +24,7 @@ import { ApiError } from '@/lib/api/client'
 import { PublicationData, publicationsApi } from '@/lib/api/publications'
 import { getFileUrl } from '@/lib/utils/fileUrl'
 import Image from 'next/image'
+import { LaboratoireCard } from '@/lib/api/laboratoires'
 
 const LABS_PER_PAGE = 6
 const CHERCHEURS_PER_PAGE = 8
@@ -319,11 +320,11 @@ const SectionCard = ({ icon, title, children }: SectionCardProps) => (
 )
 
 interface LabRowProps {
-  lab: Laboratoire
+  lab: LaboratoireCard
 }
 
 const LabRow = ({ lab }: LabRowProps) => (
-  <div className="flex items-start gap-3">
+  <Link href={`/laboratoires/${lab.id}`} className="flex items-start gap-3">
     <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
       {lab.logo ? (
         <Image
@@ -342,15 +343,15 @@ const LabRow = ({ lab }: LabRowProps) => (
         <span className="font-semibold">{lab.acronym}</span>
         <span className="text-slate-500"> — {lab.name}</span>
       </p>
-      {lab.domain && (
+      {/* {lab.domain && (
         <span
           className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${domainBadgeClass[lab.domain]}`}
         >
           {lab.domain}
         </span>
-      )}
+      )} */}
     </div>
-  </div>
+  </Link>
 )
 
 interface ChercheurRowProps {
@@ -358,7 +359,7 @@ interface ChercheurRowProps {
 }
 
 const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
-  <div className="flex items-start gap-3">
+  <Link href={`chercheurs/${chercheur.id}`} className="flex items-start gap-3">
     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
       {chercheur.photoUrl ? (
         <Image
@@ -376,7 +377,7 @@ const ChercheurRow = ({ chercheur }: ChercheurRowProps) => (
       <p className="text-sm font-medium text-slate-900 mb-0.5">{chercheur.name}</p>
       <p className="text-xs text-slate-500 truncate">{chercheur.specialty}</p>
     </div>
-  </div>
+  </Link>
 )
 
 interface PublicationRowProps {
