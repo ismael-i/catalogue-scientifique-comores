@@ -73,17 +73,17 @@ export function Footer() {
             <h3 className="font-semibold text-white mb-4 text-sm uppercase tracking-wide">Informations</h3>
             <ul className="space-y-3 text-xs">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/mentions-legales" className="text-gray-400 hover:text-white transition-colors">
                   Mentions légales
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/confidentialite" className="text-gray-400 hover:text-white transition-colors">
                   Confidentialité
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="mailto:contact@catalogue-scientifique.km" className="text-gray-400 hover:text-white transition-colors">
                   contact@catalogue-scientifique.km
                 </Link>
               </li>

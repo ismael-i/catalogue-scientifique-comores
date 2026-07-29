@@ -31,7 +31,9 @@ function HeroAvatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
 
 export function FicheHero({ chercheur }: FicheHeroProps) {
   const { name, photoUrl, institution, faculty, email, fiche } = chercheur
-  const institutionLabel = `${institution.acronym}${faculty ? ` / ${faculty}` : ''}`
+    const institutionLabel = institution
+      ? `${institution.acronym}${faculty ? ` / ${faculty}` : ''}`
+      : (faculty || null)
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">

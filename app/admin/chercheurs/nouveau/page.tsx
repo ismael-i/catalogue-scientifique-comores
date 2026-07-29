@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { chercheursApi } from "@/lib/api/chercheurs"
@@ -29,7 +29,10 @@ import {
   Camera,
   FileUp,
   Download,
-  Eye
+  Eye,
+  ChevronDown,
+  Check,
+  Search
 } from "lucide-react"
 
 // ─── Types ──────────────────────────────────────────────
@@ -53,10 +56,7 @@ interface FormData {
   institutionId: string
   institutionName: string
   faculty: string
-  laboratoireId: string
-  laboratoireName: string
-  effectif: string
-  publications: string
+  laboratoireIds: string[]
   partenariats: string
   note: string
 }
@@ -69,10 +69,7 @@ const initialFormData: FormData = {
   institutionId: "",
   institutionName: "",
   faculty: "",
-  laboratoireId: "",
-  laboratoireName: "",
-  effectif: "",
-  publications: "",
+  laboratoireIds: [],
   partenariats: "",
   note: ""
 }
@@ -93,12 +90,11 @@ export default function NouveauChercheurPage() {
 
   // Données pour sélecteurs
   const [institutions, setInstitutions] = useState<InstitutionOption[]>([])
-  const [laboratoires, setLaboratoires] = useState<LaboratoireOption[]>([])
   const [loadingData, setLoadingData] = useState(true)
 
-   const [filteredLaboratoires, setFilteredLaboratoires] = useState<LaboratoireOption[]>([])
-    const [loadingLaboratoires, setLoadingLaboratoires] = useState(false)
-    const [laboratoiresCache, setLaboratoiresCache] = useState<Record<string, LaboratoireOption[]>>({})
+  const [filteredLaboratoires, setFilteredLaboratoires] = useState<LaboratoireOption[]>([])
+  const [loadingLaboratoires, setLoadingLaboratoires] = useState(false)
+  const [laboratoiresCache, setLaboratoiresCache] = useState<Record<string, LaboratoireOption[]>>({})
 
   // ─── Upload Photo ──────────────────────────────────────
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -115,15 +111,11 @@ export default function NouveauChercheurPage() {
     }
   }, [user, authLoading, router])
 
-  // ─── Charger institutions et laboratoires ──────────────
+  // ─── Charger institutions ───────────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
-        const [instRes] = await Promise.all([
-          institutionsApi.findAllSimple(),
-        ])
-        // setInstitutions(instRes || [])
-        // setLaboratoires(laboRes || [])
+        const instRes = await institutionsApi.findAllSimple()
         setInstitutions(instRes.data || instRes || [])
       } catch (err) {
         console.error("Erreur chargement données:", err)
@@ -142,15 +134,7 @@ export default function NouveauChercheurPage() {
       if (field === "institutionId") {
         const inst = institutions.find(i => i.id === value)
         updated.institutionName = inst?.name || ""
-        updated.laboratoireId = ""
-        updated.laboratoireName = ""
       }
-
-       if (field === "laboratoireId") {
-        const labo = filteredLaboratoires.find(l => l.id === value)
-        updated.laboratoireName = labo?.name || ""
-      }
-
 
       return updated
     })
@@ -164,31 +148,58 @@ export default function NouveauChercheurPage() {
     }
   }
 
-  // labo by institution selectione 
+  // ─── Dropdown multi-sélection laboratoires ──────────────
+  const [labDropdownOpen, setLabDropdownOpen] = useState(false)
+  const [labSearch, setLabSearch] = useState("")
+  const labDropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (labDropdownRef.current && !labDropdownRef.current.contains(e.target as Node)) {
+        setLabDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  function toggleLaboratoire(labId: string) {
+    setForm(prev => ({
+      ...prev,
+      laboratoireIds: prev.laboratoireIds.includes(labId)
+        ? prev.laboratoireIds.filter(lid => lid !== labId)
+        : [...prev.laboratoireIds, labId]
+    }))
+
+    if (errors.laboratoireIds) {
+      setErrors(prev => {
+        const copy = { ...prev }
+        delete copy.laboratoireIds
+        return copy
+      })
+    }
+  }
+
+  // ─── Laboratoires disponibles (filtrés par institution si présente) ────
   useEffect(() => {
     async function loadLaboratoires() {
-      if (!form.institutionId) {
-        setFilteredLaboratoires([])
+      const cacheKey = form.institutionId || "__all__"
+
+      if (laboratoiresCache[cacheKey]) {
+        setFilteredLaboratoires(laboratoiresCache[cacheKey])
         return
       }
-  
-      // Vérifier le cache
-      if (laboratoiresCache[form.institutionId]) {
-        setFilteredLaboratoires(laboratoiresCache[form.institutionId])
-        return
-      }
-  
+
       setLoadingLaboratoires(true)
       try {
-        const labos = await laboratoiresApi.findAllSimple(form.institutionId)
+        const labos = await laboratoiresApi.findAllSimple(form.institutionId || undefined)
         const data = Array.isArray(labos) ? labos : []
-        
-        // Mettre en cache
+
         setLaboratoiresCache(prev => ({
           ...prev,
-          [form.institutionId]: data
+          [cacheKey]: data
         }))
-        
+
         setFilteredLaboratoires(data)
       } catch (err) {
         setFilteredLaboratoires([])
@@ -196,9 +207,14 @@ export default function NouveauChercheurPage() {
         setLoadingLaboratoires(false)
       }
     }
-  
+
     loadLaboratoires()
   }, [form.institutionId]) // eslint-disable-line
+
+  // Réinitialiser la sélection de labos quand l'institution change
+  useEffect(() => {
+    setForm(prev => ({ ...prev, laboratoireIds: [] }))
+  }, [form.institutionId])
 
   // ─── Gestion photo ──────────────────────────────────────
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -231,13 +247,11 @@ export default function NouveauChercheurPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Vérifier le type
     if (file.type !== "application/pdf") {
       setErrors(prev => ({ ...prev, pdf: "Seuls les fichiers PDF sont acceptés" }))
       return
     }
 
-    // Vérifier la taille (20MB max)
     if (file.size > 20 * 1024 * 1024) {
       setErrors(prev => ({ ...prev, pdf: "Le PDF ne doit pas dépasser 20MB" }))
       return
@@ -265,16 +279,8 @@ export default function NouveauChercheurPage() {
       newErrors.email = "Format d'email invalide"
     }
 
-    if (!form.specialty.trim()) {
-      newErrors.specialty = "La spécialité est obligatoire"
-    }
-
-    if (!form.institutionId) {
-      newErrors.institutionId = "L'institution est obligatoire"
-    }
-
-    if (form.effectif && (isNaN(Number(form.effectif)) || Number(form.effectif) < 0)) {
-      newErrors.effectif = "Doit être un nombre positif"
+    if (form.laboratoireIds.length === 0) {
+      newErrors.laboratoireIds = "Sélectionnez au moins un laboratoire"
     }
 
     setErrors(newErrors)
@@ -298,18 +304,15 @@ export default function NouveauChercheurPage() {
       // Préparer les données du chercheur
       const data: any = {
         name: form.name.trim(),
-        specialty: form.specialty.trim(),
-        institutionId: form.institutionId,
-        institutionName: form.institutionName,
+        specialty: form.specialty.trim() || undefined,
+        institutionId: form.institutionId || undefined,
+        institutionName: form.institutionId ? form.institutionName : undefined,
         faculty: form.faculty.trim() || undefined,
-        laboratoireId: form.laboratoireId || undefined,
-        laboratoireName: form.laboratoireName || undefined,
+        laboratoireIds: form.laboratoireIds.length ? form.laboratoireIds : undefined,
         email: form.email.trim() || undefined,
         phone: form.phone.trim() || undefined,
-        publications: form.publications.trim() || undefined,
         partenariats: form.partenariats.trim() || undefined,
-        note: form.note.trim() || undefined,
-        effectif: form.effectif ? Number(form.effectif) : undefined
+        note: form.note.trim() || undefined
       }
 
       // Nettoyer les undefined
@@ -514,18 +517,15 @@ export default function NouveauChercheurPage() {
                 {/* Spécialité */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                    Spécialité / Thématiques <span className="text-red-500">*</span>
+                    Spécialité / Thématiques
                   </label>
                   <input
                     type="text"
                     value={form.specialty}
                     onChange={(e) => handleChange("specialty", e.target.value)}
                     placeholder="Ex: Mathématiques appliquées, Analyse numérique"
-                    className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all ${
-                      errors.specialty ? "border-red-300 bg-red-50" : "border-gray-200"
-                    }`}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all"
                   />
-                  {errors.specialty && <p className="text-xs text-red-500 mt-1">{errors.specialty}</p>}
                 </div>
               </div>
             </div>
@@ -542,18 +542,16 @@ export default function NouveauChercheurPage() {
               {/* Institution */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Institution <span className="text-red-500">*</span>
+                  Institution
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <select
                     value={form.institutionId}
                     onChange={(e) => handleChange("institutionId", e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none bg-white transition-all ${
-                      errors.institutionId ? "border-red-300 bg-red-50" : "border-gray-200"
-                    }`}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none bg-white transition-all"
                   >
-                    <option value="">Sélectionner une institution</option>
+                    <option value="">Aucune institution / chercheur externe</option>
                     {institutions.map((inst) => (
                       <option key={inst.id} value={inst.id}>
                         {inst.acronym} — {inst.name}
@@ -561,7 +559,6 @@ export default function NouveauChercheurPage() {
                     ))}
                   </select>
                 </div>
-                {errors.institutionId && <p className="text-xs text-red-500 mt-1">{errors.institutionId}</p>}
               </div>
 
               {/* Faculté */}
@@ -581,79 +578,107 @@ export default function NouveauChercheurPage() {
                 </div>
               </div>
 
-              {/* Laboratoire */}
-                 <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                              Laboratoire
-                            </label>
-                            <div className="relative">
-                              <FlaskConical className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                              <select
-                                value={form.laboratoireId}
-                                onChange={(e) => handleChange("laboratoireId", e.target.value)}
-                                disabled={!form.institutionId || loadingLaboratoires}
-                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none transition-all
-                                  ${!form.institutionId || loadingLaboratoires
-                                    ? "bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200"
-                                    : "bg-white border-gray-200"
-                                  }`}
-                              >
-                                <option value="">
-                                  {!form.institutionId
-                                    ? "Sélectionnez d'abord une institution"
-                                    : loadingLaboratoires
-                                      ? "Chargement..."
-                                      : filteredLaboratoires.length === 0
-                                        ? "Aucun laboratoire trouvé"
-                                        : "Sélectionner un laboratoire"
-                                  }
-                                </option>
-                                {filteredLaboratoires.map((labo) => (
-                                  <option key={labo.id} value={labo.id}>
-                                    {labo.acronym} — {labo.name}
-                                  </option>
-                                ))}
-                              </select>
-            
-                              {/* Indicateur de chargement */}
-                              {loadingLaboratoires && (
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                  <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
-                                </div>
-                              )}
-                            </div>
-            
-                            {/* Messages d'aide */}
-                            {!form.institutionId && (
-                              <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" />
-                                Veuillez sélectionner une institution
-                              </p>
-                            )}
-                            {form.institutionId && !loadingLaboratoires && filteredLaboratoires.length === 0 && (
-                              <p className="text-[10px] text-amber-500 mt-1 flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" />
-                                Aucun laboratoire rattaché à cette institution
-                              </p>
-                            )}
-                          </div>
-
-              {/* Effectif */}
-              <div>
+              {/* Laboratoires — dropdown multi-sélection avec recherche */}
+              <div className="sm:col-span-2" ref={labDropdownRef}>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Effectif du laboratoire
+                  Laboratoires <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  value={form.effectif}
-                  onChange={(e) => handleChange("effectif", e.target.value)}
-                  placeholder="Nombre de chercheurs"
-                  min="0"
-                  className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all ${
-                    errors.effectif ? "border-red-300 bg-red-50" : "border-gray-200"
-                  }`}
-                />
-                {errors.effectif && <p className="text-xs text-red-500 mt-1">{errors.effectif}</p>}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setLabDropdownOpen(o => !o)}
+                    className={`w-full min-h-[46px] px-3 py-2 border rounded-xl text-sm text-left flex flex-wrap items-center gap-1.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all ${
+                      errors.laboratoireIds ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    {form.laboratoireIds.length === 0 ? (
+                      <span className="text-gray-400">Sélectionner un ou plusieurs laboratoires</span>
+                    ) : (
+                      filteredLaboratoires
+                        .filter((labo) => form.laboratoireIds.includes(labo.id))
+                        .map((labo) => (
+                          <span
+                            key={labo.id}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg"
+                          >
+                            {labo.acronym}
+                            <span
+                              role="button"
+                              onClick={(e) => { e.stopPropagation(); toggleLaboratoire(labo.id) }}
+                              className="hover:text-blue-900"
+                            >
+                              <X className="w-3 h-3" />
+                            </span>
+                          </span>
+                        ))
+                    )}
+                    <ChevronDown className={`w-4 h-4 text-gray-400 ml-auto flex-shrink-0 transition-transform ${labDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {labDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                      <div className="p-2 border-b border-gray-100">
+                        <div className="relative">
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                          <input
+                            type="text"
+                            value={labSearch}
+                            onChange={(e) => setLabSearch(e.target.value)}
+                            placeholder="Rechercher un laboratoire..."
+                            autoFocus
+                            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-56 overflow-y-auto">
+                        {loadingLaboratoires ? (
+                          <div className="flex items-center gap-2 text-xs text-gray-400 p-3">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Chargement...
+                          </div>
+                        ) : filteredLaboratoires.filter((labo) =>
+                            `${labo.acronym} ${labo.name}`.toLowerCase().includes(labSearch.toLowerCase())
+                          ).length === 0 ? (
+                          <p className="text-xs text-gray-400 p-3">Aucun laboratoire trouvé</p>
+                        ) : (
+                          filteredLaboratoires
+                            .filter((labo) =>
+                              `${labo.acronym} ${labo.name}`.toLowerCase().includes(labSearch.toLowerCase())
+                            )
+                            .map((labo) => {
+                              const isSelected = form.laboratoireIds.includes(labo.id)
+                              return (
+                                <button
+                                  type="button"
+                                  key={labo.id}
+                                  onClick={() => toggleLaboratoire(labo.id)}
+                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-blue-50 transition-colors ${
+                                    isSelected ? "bg-blue-50/60" : ""
+                                  }`}
+                                >
+                                  <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                                    isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300"
+                                  }`}>
+                                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                                  </span>
+                                  <FlaskConical className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
+                                  <span className="truncate">{labo.acronym} — {labo.name}</span>
+                                </button>
+                              )
+                            })
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {errors.laboratoireIds && (
+                  <p className="text-xs text-red-500 mt-1">{errors.laboratoireIds}</p>
+                )}
+                {form.institutionId && !errors.laboratoireIds && (
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Filtré par l'institution sélectionnée.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -720,41 +745,24 @@ export default function NouveauChercheurPage() {
             )}
           </div>
 
-          {/* ─── Carte : Publications & Partenariats ──────── */}
+          {/* ─── Carte : Partenariats ──────────────────────── */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-6 flex items-center gap-2">
               <Globe className="w-4 h-4 text-gray-400" />
-              Recherche & Collaborations
+              Collaborations
             </h2>
 
-            <div className="space-y-4">
-              {/* Publications */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Publications
-                </label>
-                <textarea
-                  value={form.publications}
-                  onChange={(e) => handleChange("publications", e.target.value)}
-                  placeholder="Décrivez les publications principales du chercheur..."
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none resize-none transition-all"
-                />
-              </div>
-
-              {/* Partenariats */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Partenariats
-                </label>
-                <textarea
-                  value={form.partenariats}
-                  onChange={(e) => handleChange("partenariats", e.target.value)}
-                  placeholder="Listez les partenariats et collaborations..."
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none resize-none transition-all"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Partenariats
+              </label>
+              <textarea
+                value={form.partenariats}
+                onChange={(e) => handleChange("partenariats", e.target.value)}
+                placeholder="Listez les partenariats et collaborations..."
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none resize-none transition-all"
+              />
             </div>
           </div>
 

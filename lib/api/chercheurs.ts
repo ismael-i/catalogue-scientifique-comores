@@ -7,9 +7,8 @@ export interface ChercheurCard {
   specialty: string
   faculty?: string
   institutionName?: string
-  institution?: {id: string; acronym: string; name: string }
-  laboratoireName?: string
-  laboratoire?: { id: string; acronym: string; name: string }
+  institution?: { id: string; acronym: string; name: string }
+  laboratoires?: { id: string; acronym: string; name: string }[]
 }
 
 export interface ChercheurDetail extends ChercheurCard {
@@ -18,22 +17,21 @@ export interface ChercheurDetail extends ChercheurCard {
   publications?: string
   partenariats?: string
   note?: string
-  effectif?: number
   fiche?: string
-  institution: {
+  institution?: {
     id: string
     acronym: string
     name: string
     logo?: string
     logoBg?: string
   }
-  laboratoire?: {
+  laboratoires?: {
     id: string
     acronym: string
     name: string
     publications?: any[]
     logo?: string
-  }
+  }[]
   publicationAuthors?: PublicationAuthor[]
 }
 interface Publication {

@@ -41,12 +41,16 @@ export default function FicheChercheurPage({ params }: PageProps) {
 
       // On a maintenant "data" directement, pas besoin d'attendre le state chercheur
       try {
-        const relatedRes = await chercheursApi.findAll({
-          institution: data.institution.id,
-          excludeId: data.id,
-          limit: 3,
-        })
-        setRelated(relatedRes.data)
+        if (data.institution) {
+          const relatedRes = await chercheursApi.findAll({
+            institution: data.institution.id,
+            excludeId: data.id,
+            limit: 3,
+          })
+          setRelated(relatedRes.data)
+        } else {
+          setRelated([])
+        }
       } catch (relErr) {
         console.error('Erreur related:', relErr)
       }

@@ -33,7 +33,7 @@ export interface PendingUser {
   createdAt: string
   chercheur?: {
     specialty: string
-    institution: { name: string }
+    institution: { name: string } | null
   } | null
 }
 
@@ -42,20 +42,20 @@ export interface ChercheurSearchResult {
   id: string
   name: string
   email: string | null
-  specialty: string
+  specialty?: string
   photoUrl: string | null
-  institution: { acronym: string; name: string }
-  laboratoire: { acronym: string; name: string } | null
+  institution: { acronym: string; name: string } | null
+  laboratoires: { acronym: string; name: string }[]
   hasAccount: boolean
 }
 
 export interface CreateChercheurInput {
   name: string
   email?: string
-  specialty: string
-  institutionId: string
+  specialty?: string
+  institutionId?: string
   faculty?: string
-  laboratoireId?: string
+  laboratoireIds: string[]
   phone?: string
 }
 

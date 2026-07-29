@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { authApi, type ChercheurSearchResult } from "@/lib/api/auth"
 import { institutionsApi } from "@/lib/api/institutions"
@@ -46,6 +46,8 @@ interface LaboratoireSimple {
 
 type Step = "search" | "create"
 
+const AUCUNE_INSTITUTION = "" // valeur du select = "chercheur externe"
+
 // ─── Composant principal ────────────────────────────────
 export function ValidateModal({ show, userName, userEmail, userId, onClose, onValidated }: ValidateModalProps) {
   const { token } = useAuth()
@@ -62,36 +64,75 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
   // Création nouveau chercheur
   const [institutions, setInstitutions] = useState<InstitutionSimple[]>([])
   const [laboratoires, setLaboratoires] = useState<LaboratoireSimple[]>([])
+  const [laboSearch, setLaboSearch] = useState("")
   const [createForm, setCreateForm] = useState({
     name: userName,
     email: userEmail,
     specialty: "",
-    institutionId: "",
+    institutionId: AUCUNE_INSTITUTION,
     faculty: "",
-    laboratoireId: "",
+    laboratoireIds: [] as string[],
     phone: ""
   })
   const [creating, setCreating] = useState(false)
 
-  // ─── Charger institutions au montage ───────────────────
+  // ─── Charger institutions ET laboratoires au montage ───
+  // Découplé : un chercheur peut choisir un/des labo(s) même sans institution.
   useEffect(() => {
     if (show) {
       institutionsApi.findAllSimple()
         .then(data => setInstitutions(data))
         .catch(() => {})
+      laboratoiresApi.findAllSimple()
+        .then(data => setLaboratoires(data))
+        .catch(() => {})
     }
   }, [show])
 
-  // ─── Charger laboratoires quand institution change ──────
+  // Réinitialiser le formulaire de création à chaque ouverture
   useEffect(() => {
-    if (createForm.institutionId) {
-      laboratoiresApi.findAllSimple(createForm.institutionId)
-        .then(data => setLaboratoires(data))
-        .catch(() => {})
-    } else {
-      setLaboratoires([])
+    if (show) {
+      setCreateForm({
+        name: userName,
+        email: userEmail,
+        specialty: "",
+        institutionId: AUCUNE_INSTITUTION,
+        faculty: "",
+        laboratoireIds: [],
+        phone: ""
+      })
+      setLaboSearch("")
     }
-  }, [createForm.institutionId])
+  }, [show, userName, userEmail])
+
+  const filteredLaboratoires = useMemo(() => {
+    const q = laboSearch.trim().toLowerCase()
+    if (!q) return laboratoires
+    return laboratoires.filter(
+      l => l.acronym.toLowerCase().includes(q) || l.name.toLowerCase().includes(q)
+    )
+  }, [laboratoires, laboSearch])
+
+  const selectedLaboratoires = useMemo(
+    () => laboratoires.filter(l => createForm.laboratoireIds.includes(l.id)),
+    [laboratoires, createForm.laboratoireIds]
+  )
+
+  function toggleLaboratoire(id: string) {
+    setCreateForm(prev => ({
+      ...prev,
+      laboratoireIds: prev.laboratoireIds.includes(id)
+        ? prev.laboratoireIds.filter(x => x !== id)
+        : [...prev.laboratoireIds, id]
+    }))
+  }
+
+  function removeLaboratoire(id: string) {
+    setCreateForm(prev => ({
+      ...prev,
+      laboratoireIds: prev.laboratoireIds.filter(x => x !== id)
+    }))
+  }
 
   // ─── Recherche de chercheurs ────────────────────────────
   const searchChercheurs = useCallback(async (query: string) => {
@@ -122,7 +163,7 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
   // ─── Valider avec le chercheur sélectionné ──────────────
   async function handleValidate() {
     if (!selectedChercheur || !token) return
-    
+
     setValidating(true)
     setError(null)
 
@@ -142,17 +183,30 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
     e.preventDefault()
     if (!token) return
 
-    if (!createForm.specialty || !createForm.institutionId) {
-      setError("La spécialité et l'institution sont obligatoires")
+    if (!createForm.name.trim() || createForm.name.trim().length < 2) {
+      setError("Le nom est obligatoire (2 caractères minimum)")
       return
     }
+    if (!createForm.specialty) {
+      setError("La spécialité est obligatoire")
+      return
+    }
+    if (createForm.laboratoireIds.length === 0) {
+      setError("Au moins un laboratoire est obligatoire")
+      return
+    }
+    // Note : institutionId n'est PAS obligatoire — chercheur externe autorisé
 
     setCreating(true)
     setError(null)
 
     try {
-      const newChercheur = await authApi.createChercheur(createForm, token)
-      
+      const payload = {
+        ...createForm,
+        institutionId: createForm.institutionId || undefined
+      }
+      const newChercheur = await authApi.createChercheur(payload, token)
+
       // Valider directement avec le nouveau chercheur
       await authApi.validateRegistration(userId, newChercheur.id, token)
       onValidated(newChercheur.id)
@@ -245,59 +299,72 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
                     <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
                   </div>
                 ) : searchResults.length > 0 ? (
-                  searchResults.map((chercheur) => (
-                    <button
-                      key={chercheur.id}
-                      onClick={() => setSelectedChercheur(
-                        selectedChercheur?.id === chercheur.id ? null : chercheur
-                      )}
-                      disabled={chercheur.hasAccount}
-                      className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                        chercheur.hasAccount
-                          ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
-                          : selectedChercheur?.id === chercheur.id
-                            ? "border-emerald-300 bg-emerald-50 ring-2 ring-emerald-200"
-                            : "border-gray-200 hover:border-blue-200 hover:bg-blue-50/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-blue-700 text-sm font-bold">
-                            {chercheur.name.charAt(0)}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-gray-900 text-sm truncate">
-                              {chercheur.name}
-                            </p>
-                            {selectedChercheur?.id === chercheur.id && (
-                              <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-500 truncate">{chercheur.specialty}</p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                              <Building2 className="w-3 h-3" />
-                              {chercheur.institution.acronym}
+                  searchResults.map((chercheur) => {
+                    // Affichage défensif : institution et laboratoires sont optionnels
+                    const laboAcronymes = (chercheur.laboratoires ?? [])
+                      .map(l => l.acronym)
+                      .join(", ")
+
+                    return (
+                      <button
+                        key={chercheur.id}
+                        onClick={() => setSelectedChercheur(
+                          selectedChercheur?.id === chercheur.id ? null : chercheur
+                        )}
+                        disabled={chercheur.hasAccount}
+                        className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
+                          chercheur.hasAccount
+                            ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
+                            : selectedChercheur?.id === chercheur.id
+                              ? "border-emerald-300 bg-emerald-50 ring-2 ring-emerald-200"
+                              : "border-gray-200 hover:border-blue-200 hover:bg-blue-50/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-700 text-sm font-bold">
+                              {chercheur.name.charAt(0)}
                             </span>
-                            {chercheur.laboratoire && (
-                              <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                <FlaskConical className="w-3 h-3" />
-                                {chercheur.laboratoire.acronym}
-                              </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-gray-900 text-sm truncate">
+                                {chercheur.name}
+                              </p>
+                              {selectedChercheur?.id === chercheur.id && (
+                                <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 truncate">{chercheur.specialty}</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              {chercheur.institution ? (
+                                <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                  <Building2 className="w-3 h-3" />
+                                  {chercheur.institution.acronym}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-gray-400 italic">
+                                  Chercheur externe
+                                </span>
+                              )}
+                              {laboAcronymes && (
+                                <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                  <FlaskConical className="w-3 h-3" />
+                                  {laboAcronymes}
+                                </span>
+                              )}
+                            </div>
+                            {chercheur.hasAccount && (
+                              <p className="text-[10px] text-amber-600 mt-1">
+                                ⚠️ Ce chercheur a déjà un compte
+                              </p>
                             )}
                           </div>
-                          {chercheur.hasAccount && (
-                            <p className="text-[10px] text-amber-600 mt-1">
-                              ⚠️ Ce chercheur a déjà un compte
-                            </p>
-                          )}
+                          <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                      </div>
-                    </button>
-                  ))
+                      </button>
+                    )
+                  })
                 ) : searchQuery.length >= 2 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-400 text-sm mb-3">Aucun chercheur trouvé</p>
@@ -362,6 +429,7 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
                   <input
                     type="text"
                     required
+                    minLength={2}
                     value={createForm.name}
                     onChange={e => setCreateForm({ ...createForm, name: e.target.value })}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
@@ -404,11 +472,10 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
               {/* Spécialité */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Spécialité / Thématiques <span className="text-red-500">*</span>
+                  Spécialité / Thématiques
                 </label>
                 <input
                   type="text"
-                  required
                   value={createForm.specialty}
                   onChange={e => setCreateForm({ ...createForm, specialty: e.target.value })}
                   placeholder="Ex: Mathématiques appliquées, Analyse numérique"
@@ -416,20 +483,19 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
                 />
               </div>
 
-              {/* Institution */}
+              {/* Institution — désormais OPTIONNELLE */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Institution <span className="text-red-500">*</span>
+                  Institution
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <select
-                    required
                     value={createForm.institutionId}
-                    onChange={e => setCreateForm({ ...createForm, institutionId: e.target.value, laboratoireId: "" })}
+                    onChange={e => setCreateForm({ ...createForm, institutionId: e.target.value })}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none bg-white"
                   >
-                    <option value="">Sélectionner une institution</option>
+                    <option value={AUCUNE_INSTITUTION}>Aucune institution / chercheur externe</option>
                     {institutions.map(inst => (
                       <option key={inst.id} value={inst.id}>
                         {inst.acronym} — {inst.name}
@@ -439,41 +505,88 @@ export function ValidateModal({ show, userName, userEmail, userId, onClose, onVa
                 </div>
               </div>
 
-              {/* Faculté et Laboratoire */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                    Faculté
-                  </label>
+              {/* Faculté */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Faculté
+                </label>
+                <input
+                  type="text"
+                  value={createForm.faculty}
+                  onChange={e => setCreateForm({ ...createForm, faculty: e.target.value })}
+                  placeholder="Ex: FST"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                />
+              </div>
+
+              {/* Laboratoires — multi-sélection avec recherche + chips */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Laboratoire(s) <span className="text-red-500">*</span>
+                </label>
+
+                {/* Chips des labos sélectionnés */}
+                {selectedLaboratoires.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {selectedLaboratoires.map(labo => (
+                      <span
+                        key={labo.id}
+                        className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium rounded-full"
+                      >
+                        {labo.acronym}
+                        <button
+                          type="button"
+                          onClick={() => removeLaboratoire(labo.id)}
+                          className="w-4 h-4 rounded-full hover:bg-blue-200 flex items-center justify-center"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Recherche + liste */}
+                <div className="relative">
+                  <FlaskConical className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
-                    value={createForm.faculty}
-                    onChange={e => setCreateForm({ ...createForm, faculty: e.target.value })}
-                    placeholder="Ex: FST"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                    value={laboSearch}
+                    onChange={e => setLaboSearch(e.target.value)}
+                    placeholder="Rechercher un laboratoire..."
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                    Laboratoire
-                  </label>
-                  <div className="relative">
-                    <FlaskConical className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      value={createForm.laboratoireId}
-                      onChange={e => setCreateForm({ ...createForm, laboratoireId: e.target.value })}
-                      disabled={!createForm.institutionId}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none bg-white disabled:bg-gray-50 disabled:text-gray-400"
-                    >
-                      <option value="">Sélectionner</option>
-                      {laboratoires.map(labo => (
-                        <option key={labo.id} value={labo.id}>
-                          {labo.acronym}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="mt-2 max-h-40 overflow-y-auto border border-gray-100 rounded-xl divide-y divide-gray-50">
+                  {filteredLaboratoires.length > 0 ? (
+                    filteredLaboratoires.map(labo => {
+                      const checked = createForm.laboratoireIds.includes(labo.id)
+                      return (
+                        <button
+                          key={labo.id}
+                          type="button"
+                          onClick={() => toggleLaboratoire(labo.id)}
+                          className={`w-full flex items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
+                            checked ? "bg-blue-50 text-blue-700" : "hover:bg-gray-50 text-gray-700"
+                          }`}
+                        >
+                          <span>
+                            <strong>{labo.acronym}</strong>
+                            <span className="text-gray-400"> — {labo.name}</span>
+                          </span>
+                          {checked && <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />}
+                        </button>
+                      )
+                    })
+                  ) : (
+                    <p className="text-xs text-gray-400 text-center py-3">Aucun laboratoire trouvé</p>
+                  )}
                 </div>
+                {createForm.laboratoireIds.length === 0 && (
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Au moins un laboratoire est requis pour créer une publication ou un article.
+                  </p>
+                )}
               </div>
 
               {/* Bouton créer et valider */}

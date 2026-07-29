@@ -631,14 +631,14 @@ export default function ModifierArticlePage() {
                         <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600 flex-shrink-0">
                           {c.name.charAt(0)}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="truncate">{c.name}</p>
-                          {c.laboratoireName && (
-                            <p className="text-xs text-gray-400 truncate">
-                              {c.laboratoireName}
-                            </p>
-                          )}
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate">{c.name}</p>
+                      {c.laboratoires && c.laboratoires.length > 0 && (
+                        <p className="text-xs text-gray-400 truncate">
+                          {c.laboratoires.map(l => l.acronym).join(", ")}
+                        </p>
+                      )}
+                    </div>
                         {form.chercheurId === c.id && (
                           <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
                         )}

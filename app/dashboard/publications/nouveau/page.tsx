@@ -49,9 +49,9 @@ export default function NouvellePublicationChercheurPage() {
     if (token && user?.chercheurId) {
       chercheursApi.findById(user.chercheurId).then(data => {
         setChercheurProfil(data)
-        // Pré-remplir le laboratoire du chercheur si possible
-        if (data.laboratoire?.id) {
-          setForm(prev => ({ ...prev, laboratoireId: data.laboratoire!.id }))
+        // Pré-remplir automatiquement seulement si le chercheur n'a qu'un seul labo
+        if (data.laboratoires && data.laboratoires.length === 1) {
+          setForm(prev => ({ ...prev, laboratoireId: data.laboratoires![0].id }))
         }
       })
     }
@@ -155,6 +155,22 @@ export default function NouvellePublicationChercheurPage() {
   }
 
   if (!chercheurProfil) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin" /></div>
+  
+  if (!chercheurProfil.laboratoires || chercheurProfil.laboratoires.length === 0) {
+  return (
+    <div className="max-w-2xl mx-auto py-20 text-center">
+      <FlaskConical className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">Aucun laboratoire associé</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Vous devez être rattaché à au moins un laboratoire pour pouvoir publier. Contactez un administrateur pour régulariser votre situation.
+      </p>
+      <Link href="/dashboard/publications" className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+        <ArrowLeft className="w-4 h-4" />
+        Retour aux publications
+      </Link>
+    </div>
+  )
+}
   if (success) return <div className="max-w-2xl mx-auto py-20 text-center"><CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" /><h2 className="text-2xl font-bold">Publication créée !</h2></div>
 
   const selectedChercheurs = chercheurs.filter(c => authorIds.includes(c.id))
@@ -211,12 +227,27 @@ export default function NouvellePublicationChercheurPage() {
               {errors.domain && <p className="text-xs text-red-500 mt-1">{errors.domain}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Laboratoire <span className="text-red-500">*</span></label>
-              <select disabled value={form.laboratoireId} onChange={e => handleChange("laboratoireId", e.target.value)} className={`w-full px-4 py-2.5 border rounded-xl text-sm bg-white ${errors.laboratoireId ? "border-red-300" : "border-gray-200"}`}>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                Laboratoire <span className="text-red-500">*</span>
+              </label>
+              <select
+                disabled={chercheurProfil?.laboratoires?.length === 1}
+                value={form.laboratoireId}
+                onChange={e => handleChange("laboratoireId", e.target.value)}
+                className={`w-full px-4 py-2.5 border rounded-xl text-sm bg-white ${errors.laboratoireId ? "border-red-300" : "border-gray-200"}`}
+              >
                 <option value="">Sélectionner</option>
                 {laboratoires.map((l: any) => <option key={l.id} value={l.id}>{l.acronym} – {l.name}</option>)}
               </select>
               {errors.laboratoireId && <p className="text-xs text-red-500 mt-1">{errors.laboratoireId}</p>}
+              {chercheurProfil?.laboratoires?.length === 1 && (
+                <p className="text-[10px] text-gray-400 mt-1">Laboratoire unique, verrouillé automatiquement.</p>
+              )}
+              {chercheurProfil?.laboratoires && chercheurProfil.laboratoires.length > 1 && (
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Vous appartenez à plusieurs laboratoires — choisissez celui concerné par cette publication.
+                </p>
+              )}
             </div>
           </div>
         </div>

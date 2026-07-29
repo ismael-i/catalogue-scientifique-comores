@@ -18,7 +18,7 @@ interface LaboCardProps {
 }
 
 export function LaboCard({ labo }: LaboCardProps) {
-  const { id, acronym, name, description, categorie, researchers, institution  ,logo} = labo
+  const { id, acronym, name, description, categorie, researchers, institution  ,logo , _count} = labo
 
   return (
     <Link href={`/laboratoires/${id}`}>
@@ -54,7 +54,7 @@ export function LaboCard({ labo }: LaboCardProps) {
           <div className="flex items-center gap-3 text-xs text-slate-400">
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {researchers} chercheurs
+              {_count?.chercheurs} chercheurs
             </span>
             <span>•</span>
             <span className="truncate max-w-[140px]">{institution.name}</span>

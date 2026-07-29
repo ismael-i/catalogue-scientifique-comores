@@ -162,12 +162,15 @@ export default function AdminChercheurDetailPage() {
                     {chercheur.faculty}
                   </span>
                 )}
-                {chercheur.laboratoire && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full">
+                {chercheur.laboratoires?.map((labo) => (
+                  <span
+                    key={labo.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
+                  >
                     <FlaskConical className="w-3 h-3" />
-                    {chercheur.laboratoire.acronym} — {chercheur.laboratoire.name}
+                    {labo.acronym} — {labo.name}
                   </span>
-                )}
+                ))}
               </div>
             </div>
           </div>
@@ -211,7 +214,7 @@ export default function AdminChercheurDetailPage() {
           </div>
 
           {/* Informations académiques */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-gray-400" />
               Informations académiques
@@ -227,20 +230,29 @@ export default function AdminChercheurDetailPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Publications */}
-          {chercheur.publications && (
-            <div className="space-y-4 md:col-span-2">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
-                <FileText className="w-4 h-4 text-gray-400" />
-                Publications
-              </h3>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <p className="text-sm text-gray-600 whitespace-pre-wrap">{chercheur.publications}</p>
-              </div>
+        {/* Publications — conditionnel */}
+        {chercheur.publicationAuthors && chercheur.publicationAuthors.length > 0 && (
+          <div className="space-y-4 md:col-span-2">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
+              <FileText className="w-4 h-4 text-gray-400" />
+              Publications
+            </h3>
+            <div className="p-4 bg-gray-50 rounded-xl space-y-2">
+              {chercheur.publicationAuthors.map((pa) => (
+                <Link
+                  key={pa.id}
+                  href={`/publications/${pa.publicationId}`}
+                  className="block text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  {pa.publication?.title ?? 'Titre indisponible'}
+                </Link>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
           {/* Partenariats */}
           {chercheur.partenariats && (

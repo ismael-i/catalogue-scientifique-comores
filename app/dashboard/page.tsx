@@ -69,8 +69,8 @@ export default function ChercheurDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Institution */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl ${chercheur.institution.logoBg || "bg-blue-100"} flex items-center justify-center overflow-hidden flex-shrink-0`}>
-              {chercheur.institution.logo ? (
+            <div className={`w-12 h-12 rounded-xl ${chercheur.institution?.logoBg || "bg-blue-100"} flex items-center justify-center overflow-hidden flex-shrink-0`}>
+              {chercheur.institution?.logo ? (
                 <img src={getFileUrl(chercheur.institution.logo)} alt={chercheur.institution.acronym} className="w-10 h-10 object-contain" />
               ) : (
                 <Building2 className="w-6 h-6 text-blue-600" />
@@ -78,27 +78,33 @@ export default function ChercheurDashboard() {
             </div>
             <div>
               <p className="text-xs text-gray-400 uppercase font-semibold">Institution</p>
-              <p className="text-sm font-bold text-gray-900">{chercheur.institution.name}</p>
-              <p className="text-xs text-gray-500">{chercheur.institution.acronym}</p>
+              <p className="text-sm font-bold text-gray-900">
+                {chercheur.institution ? chercheur.institution.name : "Chercheur externe"}
+              </p>
+              <p className="text-xs text-gray-500">{chercheur.institution?.acronym || ""}</p>
             </div>
           </div>
 
-          {/* Laboratoire */}
+          {/* Laboratoire(s) */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {chercheur.laboratoire?.logo ? (
-                <img src={getFileUrl(chercheur.laboratoire.logo)} alt={chercheur.laboratoire.acronym} className="w-10 h-10 object-contain" />
+              {chercheur.laboratoires?.[0]?.logo ? (
+                <img src={getFileUrl(chercheur.laboratoires[0].logo)} alt={chercheur.laboratoires[0].acronym} className="w-10 h-10 object-contain" />
               ) : (
                 <FlaskConical className="w-6 h-6 text-blue-500" />
               )}
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase font-semibold">Laboratoire</p>
+              <p className="text-xs text-gray-400 uppercase font-semibold">
+                {(chercheur.laboratoires?.length ?? 0) > 1 ? "Laboratoires" : "Laboratoire"}
+              </p>
               <p className="text-sm font-bold text-gray-900">
-                {chercheur.laboratoire ? chercheur.laboratoire.name : "Aucun laboratoire"}
+                {chercheur.laboratoires && chercheur.laboratoires.length > 0
+                  ? chercheur.laboratoires.map(l => l.name).join(", ")
+                  : "Aucun laboratoire"}
               </p>
               <p className="text-xs text-gray-500">
-                {chercheur.laboratoire?.acronym || ""}
+                {chercheur.laboratoires?.map(l => l.acronym).join(", ") || ""}
               </p>
             </div>
           </div>

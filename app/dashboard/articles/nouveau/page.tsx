@@ -37,19 +37,26 @@ export default function NouvelArticleChercheurPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
 
-  // Profil du chercheur (pour récupérer laboratoireId)
-  const [chercheur, setChercheur] = useState<ChercheurDetail | null>(null)
-  const [loadingProfil, setLoadingProfil] = useState(true)
+// Profil du chercheur (pour récupérer laboratoireId)
+const [chercheur, setChercheur] = useState<ChercheurDetail | null>(null)
+const [loadingProfil, setLoadingProfil] = useState(true)
+const [selectedLaboratoireId, setSelectedLaboratoireId] = useState("")
 
-  // Charger le profil du chercheur connecté
-  useEffect(() => {
-    if (!token || !user?.chercheurId) return
-    chercheursApi
-      .findById(user.chercheurId)
-      .then(data => setChercheur(data))
-      .catch(console.error)
-      .finally(() => setLoadingProfil(false))
-  }, [token, user])
+// Charger le profil du chercheur connecté
+useEffect(() => {
+  if (!token || !user?.chercheurId) return
+  chercheursApi
+    .findById(user.chercheurId)
+    .then(data => {
+      setChercheur(data)
+      // Pré-remplir automatiquement seulement si un seul laboratoire
+      if (data.laboratoires && data.laboratoires.length === 1) {
+        setSelectedLaboratoireId(data.laboratoires[0].id)
+      }
+    })
+    .catch(console.error)
+    .finally(() => setLoadingProfil(false))
+}, [token, user])
 
   // Handlers formulaire
   const handleChange = (field: string, value: any) => {
@@ -101,16 +108,17 @@ export default function NouvelArticleChercheurPage() {
   }
 
   // Validation
-  const validate = () => {
-    const errs: Record<string, string> = {}
-    if (!form.title.trim()) errs.title = "Titre requis"
-    if (!form.title.trim() || form.title.trim().length < 5) errs.title = "Titre trop court (min 5 caractères)"
-    if (!form.description.trim() || form.description.trim().length < 20) errs.description = "Description trop courte (min 20)"
-    if (form.body.some(line => line.trim() === "")) errs.body = "Tous les paragraphes doivent être remplis"
-    if (form.tags.length === 0) errs.tags = "Ajoutez au moins un tag"
-    setErrors(errs)
-    return Object.keys(errs).length === 0
-  }
+const validate = () => {
+  const errs: Record<string, string> = {}
+  if (!form.title.trim()) errs.title = "Titre requis"
+  if (!form.title.trim() || form.title.trim().length < 5) errs.title = "Titre trop court (min 5 caractères)"
+  if (!form.description.trim() || form.description.trim().length < 20) errs.description = "Description trop courte (min 20)"
+  if (form.body.some(line => line.trim() === "")) errs.body = "Tous les paragraphes doivent être remplis"
+  if (form.tags.length === 0) errs.tags = "Ajoutez au moins un tag"
+  if (!selectedLaboratoireId) errs.laboratoireId = "Sélectionnez un laboratoire"
+  setErrors(errs)
+  return Object.keys(errs).length === 0
+}
 
   // Soumission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,7 +134,7 @@ export default function NouvelArticleChercheurPage() {
         description: form.description.trim(),
         body: form.body.filter(line => line.trim()),
         chercheurId: chercheur.id,
-        laboratoireId: chercheur.laboratoire?.id || undefined,
+        laboratoireId: selectedLaboratoireId,
         tags: form.tags
       }
 
@@ -158,16 +166,31 @@ export default function NouvelArticleChercheurPage() {
     )
   }
 
-  if (!chercheur) {
-    return (
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="bg-red-50 p-4 rounded-2xl text-red-700">
-          Votre profil chercheur est introuvable. Veuillez contacter l'administration.
-        </div>
+if (!chercheur) {
+  return (
+    <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="bg-red-50 p-4 rounded-2xl text-red-700">
+        Votre profil chercheur est introuvable. Veuillez contacter l'administration.
       </div>
-    )
-  }
+    </div>
+  )
+}
 
+if (!chercheur.laboratoires || chercheur.laboratoires.length === 0) {
+  return (
+    <div className="max-w-2xl mx-auto py-20 text-center">
+      <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">Aucun laboratoire associé</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Vous devez être rattaché à au moins un laboratoire pour pouvoir publier un article. Contactez un administrateur.
+      </p>
+      <Link href="/dashboard/articles" className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+        <ArrowLeft className="w-4 h-4" />
+        Retour à mes articles
+      </Link>
+    </div>
+  )
+}
   if (success) {
     return (
       <div className="max-w-2xl mx-auto py-20 text-center">
@@ -194,22 +217,23 @@ export default function NouvelArticleChercheurPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Nouvel article</h1>
         <p className="text-sm text-gray-400 mt-1">
-          Cet article sera automatiquement rattaché à votre profil et à votre laboratoire.
+          Cet article sera automatiquement rattaché à votre profil. Sélectionnez le laboratoire concerné ci-dessous.
         </p>
       </div>
 
       {/* Bloc info auteur (lecture seule) */}
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-3 text-sm">
-        <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold">
-          {chercheur.name.charAt(0)}
-        </div>
-        <div>
-          <p className="font-medium text-blue-900">{chercheur.name}</p>
-          <p className="text-xs text-blue-700">
-            {chercheur.institution.acronym} – {chercheur.laboratoire?.acronym || "Aucun laboratoire"}
-          </p>
-        </div>
+    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-3 text-sm">
+      <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold">
+        {chercheur.name.charAt(0)}
       </div>
+      <div>
+        <p className="font-medium text-blue-900">{chercheur.name}</p>
+        <p className="text-xs text-blue-700">
+          {chercheur.institution ? `${chercheur.institution.acronym} – ` : ""}
+          {chercheur.laboratoires.length} laboratoire{chercheur.laboratoires.length > 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
 
       {/* Erreur */}
       {submitError && (
@@ -390,26 +414,44 @@ export default function NouvelArticleChercheurPage() {
         {/* Rattachement (lecture seule) */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
           <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-            Rattachement automatique
+            Rattachement
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Institution</label>
               <input
                 type="text"
-                value={`${chercheur.institution.acronym} – ${chercheur.institution.name}`}
+                value={chercheur.institution ? `${chercheur.institution.acronym} – ${chercheur.institution.name}` : "Aucune"}
                 disabled
                 className="w-full px-4 py-2.5 border rounded-xl text-sm bg-gray-50 text-gray-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Laboratoire</label>
-              <input
-                type="text"
-                value={chercheur.laboratoire ? `${chercheur.laboratoire.acronym} – ${chercheur.laboratoire.name}` : "Aucun"}
-                disabled
-                className="w-full px-4 py-2.5 border rounded-xl text-sm bg-gray-50 text-gray-500"
-              />
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Laboratoire <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedLaboratoireId}
+                onChange={(e) => {
+                  setSelectedLaboratoireId(e.target.value)
+                  if (errors.laboratoireId) setErrors(prev => { const c = { ...prev }; delete c.laboratoireId; return c })
+                }}
+                disabled={chercheur.laboratoires.length === 1}
+                className={`w-full px-4 py-2.5 border rounded-xl text-sm bg-white ${
+                  errors.laboratoireId ? "border-red-300" : "border-gray-200"
+                } ${chercheur.laboratoires.length === 1 ? "bg-gray-50 text-gray-500" : ""}`}
+              >
+                <option value="">Sélectionner</option>
+                {chercheur.laboratoires.map((labo) => (
+                  <option key={labo.id} value={labo.id}>{labo.acronym} – {labo.name}</option>
+                ))}
+              </select>
+              {errors.laboratoireId && <p className="text-xs text-red-500 mt-1">{errors.laboratoireId}</p>}
+              {chercheur.laboratoires.length > 1 && (
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Choisissez le laboratoire concerné par cet article.
+                </p>
+              )}
             </div>
           </div>
         </div>

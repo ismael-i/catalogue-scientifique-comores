@@ -205,9 +205,14 @@ export default function NouvelArticlePage() {
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Auteur (chercheur)</label>
               <input type="text" value={searchChercheur} onChange={e => setSearchChercheur(e.target.value)} placeholder="Rechercher un chercheur..." className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2" />
               <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-lg">
-                {filteredChercheurs.map(c => (
-                  <button key={c.id} type="button" onClick={() => { handleChange("chercheurId", c.id); setSearchChercheur(c.name) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 ${form.chercheurId === c.id ? "bg-blue-50 text-blue-700 font-medium" : ""}`}>
-                    {c.name} {c.laboratoireName ? `(${c.laboratoireName})` : ""}
+               {filteredChercheurs.map(c => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => { handleChange("chercheurId", c.id); setSearchChercheur(c.name) }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 ${form.chercheurId === c.id ? "bg-blue-50 text-blue-700 font-medium" : ""}`}
+                  >
+                    {c.name} {c.laboratoires && c.laboratoires.length > 0 ? `(${c.laboratoires.map(l => l.acronym).join(", ")})` : ""}
                   </button>
                 ))}
                 {filteredChercheurs.length === 0 && <p className="text-xs text-gray-400 p-2">Aucun chercheur trouvé</p>}

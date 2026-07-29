@@ -171,14 +171,27 @@ export default function ProfilChercheurPage() {
         <div className="bg-white rounded-2xl border p-6 grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Institution</label>
-            <input type="text" value={chercheur.institution.acronym + " – " + chercheur.institution.name} disabled className="w-full px-4 py-2.5 border rounded-xl text-sm bg-gray-50 text-gray-500" />
+            <input
+              type="text"
+              value={chercheur.institution ? `${chercheur.institution.acronym} – ${chercheur.institution.name}` : "Aucune"}
+              disabled
+              className="w-full px-4 py-2.5 border rounded-xl text-sm bg-gray-50 text-gray-500"
+            />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Laboratoire</label>
-            <input type="text" value={chercheur.laboratoire ? chercheur.laboratoire.acronym + " – " + chercheur.laboratoire.name : "Aucun"} disabled className="w-full px-4 py-2.5 border rounded-xl text-sm bg-gray-50 text-gray-500" />
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Laboratoire(s)</label>
+            <input
+              type="text"
+              value={
+                chercheur.laboratoires && chercheur.laboratoires.length > 0
+                  ? chercheur.laboratoires.map(l => l.acronym).join(', ')
+                  : "Aucun"
+              }
+              disabled
+              className="w-full px-4 py-2.5 border rounded-xl text-sm bg-gray-50 text-gray-500"
+            />
           </div>
         </div>
-
         {/* Fiche PDF */}
         <div className="bg-white rounded-2xl border p-6">
           <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Fiche PDF</label>

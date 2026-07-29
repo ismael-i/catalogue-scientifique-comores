@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { chercheursApi, type ChercheurDetail } from "@/lib/api/chercheurs"
@@ -31,7 +31,10 @@ import {
   Eye,
   FileUp,
   ImagePlus,
-  RotateCcw
+  RotateCcw,
+  ChevronDown,
+  Check,
+  Search
 } from "lucide-react"
 
 // ─── Types ──────────────────────────────────────────────
@@ -55,12 +58,17 @@ interface FormData {
   institutionId: string
   institutionName: string
   faculty: string
-  laboratoireId: string
-  laboratoireName: string
-  effectif: string
-  publications: string
+  laboratoireIds: string[]
   partenariats: string
   note: string
+}
+
+// ─── Helper : comparaison de tableaux sans tenir compte de l'ordre ──
+function arraysEqualUnordered(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const sortedA = [...a].sort()
+  const sortedB = [...b].sort()
+  return sortedA.every((v, i) => v === sortedB[i])
 }
 
 // ─── Composant principal ────────────────────────────────
@@ -74,8 +82,7 @@ export default function ModifierChercheurPage() {
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", specialty: "",
     institutionId: "", institutionName: "", faculty: "",
-    laboratoireId: "", laboratoireName: "", effectif: "",
-    publications: "", partenariats: "", note: ""
+    laboratoireIds: [], partenariats: "", note: ""
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [originalData, setOriginalData] = useState<ChercheurDetail | null>(null)
@@ -89,7 +96,6 @@ export default function ModifierChercheurPage() {
 
   // Données pour sélecteurs
   const [institutions, setInstitutions] = useState<InstitutionOption[]>([])
-  const [laboratoires, setLaboratoires] = useState<LaboratoireOption[]>([])
 
   const [filteredLaboratoires, setFilteredLaboratoires] = useState<LaboratoireOption[]>([])
   const [loadingLaboratoires, setLoadingLaboratoires] = useState(false)
@@ -138,12 +144,10 @@ export default function ModifierChercheurPage() {
         const [chercheur, instRes] = await Promise.all([
           chercheursApi.findById(id),
           institutionsApi.findAllSimple(),
-          // laboratoiresApi.findAllSimple()
         ])
 
         setOriginalData(chercheur)
         setInstitutions(instRes.data || instRes || [])
-        // setLaboratoires(laboRes.data || laboRes || [])
 
         // Remplir le formulaire
         setForm({
@@ -154,10 +158,7 @@ export default function ModifierChercheurPage() {
           institutionId: chercheur.institution?.id || "",
           institutionName: chercheur.institution?.name || chercheur.institutionName || "",
           faculty: chercheur.faculty || "",
-          laboratoireId: chercheur.laboratoire?.id || "",
-          laboratoireName: chercheur.laboratoire?.name || chercheur.laboratoireName || "",
-          effectif: chercheur.effectif?.toString() || "",
-          publications: chercheur.publications || "",
+          laboratoireIds: chercheur.laboratoires?.map(l => l.id) || [],
           partenariats: chercheur.partenariats || "",
           note: chercheur.note || ""
         })
@@ -187,16 +188,13 @@ export default function ModifierChercheurPage() {
     setForm(prev => {
       const updated = { ...prev, [field]: value }
 
+      // Changer d'institution réinitialise la sélection de labos
+      // (action déclenchée par l'utilisateur uniquement, pas par le chargement initial
+      // qui utilise setForm directement dans loadData ci-dessus)
       if (field === "institutionId") {
         const inst = institutions.find(i => i.id === value)
         updated.institutionName = inst?.name || ""
-        updated.laboratoireId = ""
-        updated.laboratoireName = ""
-      }
-
-      if (field === "laboratoireId") {
-        const labo = filteredLaboratoires.find(l => l.id === value)
-        updated.laboratoireName = labo?.name || ""
+        updated.laboratoireIds = []
       }
 
       return updated
@@ -211,58 +209,80 @@ export default function ModifierChercheurPage() {
     }
   }
 
-// labo by institution selectione 
-useEffect(() => {
-  async function loadLaboratoires() {
-    if (!form.institutionId) {
-      setFilteredLaboratoires([])
-      return
-    }
+  // ─── Dropdown multi-sélection laboratoires ──────────────
+  const [labDropdownOpen, setLabDropdownOpen] = useState(false)
+  const [labSearch, setLabSearch] = useState("")
+  const labDropdownRef = useRef<HTMLDivElement>(null)
 
-    // Vérifier le cache
-    if (laboratoiresCache[form.institutionId]) {
-      setFilteredLaboratoires(laboratoiresCache[form.institutionId])
-      return
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (labDropdownRef.current && !labDropdownRef.current.contains(e.target as Node)) {
+        setLabDropdownOpen(false)
+      }
     }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-    setLoadingLaboratoires(true)
-    try {
-      const labos = await laboratoiresApi.findAllSimple(form.institutionId)
-      const data = Array.isArray(labos) ? labos : []
-      
-      // Mettre en cache
-      setLaboratoiresCache(prev => ({
-        ...prev,
-        [form.institutionId]: data
-      }))
-      
-      setFilteredLaboratoires(data)
-    } catch (err) {
-      setFilteredLaboratoires([])
-    } finally {
-      setLoadingLaboratoires(false)
+  function toggleLaboratoire(labId: string) {
+    setForm(prev => ({
+      ...prev,
+      laboratoireIds: prev.laboratoireIds.includes(labId)
+        ? prev.laboratoireIds.filter(lid => lid !== labId)
+        : [...prev.laboratoireIds, labId]
+    }))
+
+    if (errors.laboratoireIds) {
+      setErrors(prev => {
+        const copy = { ...prev }
+        delete copy.laboratoireIds
+        return copy
+      })
     }
   }
 
-  loadLaboratoires()
-}, [form.institutionId]) // eslint-disable-line
+  // labo by institution selectionnée (ou tous si aucune institution)
+  useEffect(() => {
+    async function loadLaboratoires() {
+      const cacheKey = form.institutionId || "__all__"
+
+      if (laboratoiresCache[cacheKey]) {
+        setFilteredLaboratoires(laboratoiresCache[cacheKey])
+        return
+      }
+
+      setLoadingLaboratoires(true)
+      try {
+        const labos = await laboratoiresApi.findAllSimple(form.institutionId || undefined)
+        const data = Array.isArray(labos) ? labos : []
+
+        setLaboratoiresCache(prev => ({
+          ...prev,
+          [cacheKey]: data
+        }))
+
+        setFilteredLaboratoires(data)
+      } catch (err) {
+        setFilteredLaboratoires([])
+      } finally {
+        setLoadingLaboratoires(false)
+      }
+    }
+
+    loadLaboratoires()
+  }, [form.institutionId]) // eslint-disable-line
 
   // ─── GESTION PHOTO ──────────────────────────────────────
 
-  /**
-   * Sélection d'une nouvelle photo
-   */
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Valider le type
     if (!file.type.startsWith("image/")) {
       setPhotoError("Format non supporté. Utilisez JPG, PNG, WebP ou GIF.")
       return
     }
 
-    // Valider la taille (20MB max)
     if (file.size > 20 * 1024 * 1024) {
       setPhotoError("L'image ne doit pas dépasser 20MB")
       return
@@ -274,11 +294,7 @@ useEffect(() => {
     setPhotoAction(PhotoAction.UPLOAD_NEW)
   }
 
-  /**
-   * Supprimer la photo (nouvelle ou existante)
-   */
   function handleRemovePhoto() {
-    // Nettoyer la preview si nouvelle photo
     if (newPhotoPreview) {
       URL.revokeObjectURL(newPhotoPreview)
     }
@@ -289,9 +305,6 @@ useEffect(() => {
     setPhotoError(null)
   }
 
-  /**
-   * Annuler les changements sur la photo (revenir à l'original)
-   */
   function handleCancelPhotoChanges() {
     if (newPhotoPreview) {
       URL.revokeObjectURL(newPhotoPreview)
@@ -341,9 +354,6 @@ useEffect(() => {
 
   // ─── Helpers d'affichage ────────────────────────────────
 
-  /**
-   * URL de la photo à afficher dans le preview
-   */
   function getDisplayPhotoUrl(): string | null {
     if (photoAction === PhotoAction.REMOVE) return null
     if (photoAction === PhotoAction.UPLOAD_NEW && newPhotoPreview) return newPhotoPreview
@@ -351,9 +361,6 @@ useEffect(() => {
     return null
   }
 
-  /**
-   * Nom du fichier extrait du chemin
-   */
   function getFileNameFromPath(filePath: string): string {
     return filePath.split("/").pop() || "fichier"
   }
@@ -368,6 +375,8 @@ useEffect(() => {
     // Vérifier les changements PDF
     if (pdfAction !== PdfAction.KEEP) return true
 
+    const originalLaboratoireIds = originalData.laboratoires?.map(l => l.id) || []
+
     // Vérifier les changements formulaire
     return (
       form.name !== (originalData.name || "") ||
@@ -376,9 +385,7 @@ useEffect(() => {
       form.specialty !== (originalData.specialty || "") ||
       form.institutionId !== (originalData.institution?.id || "") ||
       form.faculty !== (originalData.faculty || "") ||
-      form.laboratoireId !== (originalData.laboratoire?.id || "") ||
-      form.effectif !== (originalData.effectif?.toString() || "") ||
-      form.publications !== (originalData.publications || "") ||
+      !arraysEqualUnordered(form.laboratoireIds, originalLaboratoireIds) ||
       form.partenariats !== (originalData.partenariats || "") ||
       form.note !== (originalData.note || "")
     )
@@ -396,16 +403,8 @@ useEffect(() => {
       newErrors.email = "Format d'email invalide"
     }
 
-    if (!form.specialty.trim()) {
-      newErrors.specialty = "La spécialité est obligatoire"
-    }
-
-    if (!form.institutionId) {
-      newErrors.institutionId = "L'institution est obligatoire"
-    }
-
-    if (form.effectif && (isNaN(Number(form.effectif)) || Number(form.effectif) < 0)) {
-      newErrors.effectif = "Doit être un nombre positif"
+    if (form.laboratoireIds.length === 0) {
+      newErrors.laboratoireIds = "Sélectionnez au moins un laboratoire"
     }
 
     setErrors(newErrors)
@@ -429,18 +428,15 @@ useEffect(() => {
       // 1. Mettre à jour les données du chercheur
       const data: any = {
         name: form.name.trim(),
-        specialty: form.specialty.trim(),
-        institutionId: form.institutionId,
-        institutionName: form.institutionName,
+        specialty: form.specialty.trim() || undefined,
+        institutionId: form.institutionId || undefined,
+        institutionName: form.institutionId ? form.institutionName : undefined,
         faculty: form.faculty.trim() || undefined,
-        laboratoireId: form.laboratoireId || undefined,
-        laboratoireName: form.laboratoireName || undefined,
+        laboratoireIds: form.laboratoireIds,
         email: form.email.trim() || undefined,
         phone: form.phone.trim() || undefined,
-        publications: form.publications.trim() || undefined,
         partenariats: form.partenariats.trim() || undefined,
-        note: form.note.trim() || undefined,
-        effectif: form.effectif ? Number(form.effectif) : undefined
+        note: form.note.trim() || undefined
       }
 
       Object.keys(data).forEach(key => {
@@ -457,7 +453,6 @@ useEffect(() => {
       //    │  └─ REMOVE    → Supprimer la photo actuelle     │
       //    └─────────────────────────────────────────────────┘
 
-      // 2a. Supprimer la photo existante si demandé
       if (photoAction === PhotoAction.REMOVE) {
         try {
           await uploadApi.deletePhoto("chercheurs", id, token)
@@ -467,14 +462,11 @@ useEffect(() => {
         }
       }
 
-      // 2b. Uploader la nouvelle photo
       if (photoAction === PhotoAction.UPLOAD_NEW && newPhotoFile) {
         try {
-          // D'abord supprimer l'ancienne si elle existe
           if (currentPhotoPath) {
             await uploadApi.deletePhoto("chercheurs", id, token)
           }
-          // Puis uploader la nouvelle
           await uploadApi.uploadPhoto(newPhotoFile, "chercheurs", id, token)
           console.log("✅ Nouvelle photo uploadée")
         } catch (err) {
@@ -610,7 +602,7 @@ useEffect(() => {
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
-          
+
           {/* ════════════════════════════════════════════════
               CARTE : IDENTITÉ + PHOTO
               ════════════════════════════════════════════════ */}
@@ -621,14 +613,13 @@ useEffect(() => {
             </h2>
 
             <div className="flex flex-col sm:flex-row gap-6">
-              
+
               {/* ─── Zone Photo ─────────────────────────── */}
               <div className="flex-shrink-0">
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                   Photo
                 </label>
 
-                {/* Affichage photo / placeholder */}
                 <div className="relative w-28 h-28">
                   {displayPhotoUrl ? (
                     <>
@@ -637,15 +628,13 @@ useEffect(() => {
                         alt="Photo chercheur"
                         className="w-28 h-28 rounded-2xl object-cover border-2 border-gray-100 shadow-sm"
                       />
-                      
-                      {/* Badge "Nouvelle" */}
+
                       {photoAction === PhotoAction.UPLOAD_NEW && (
                         <span className="absolute -top-2 -left-2 px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-sm">
                           Nouvelle
                         </span>
                       )}
 
-                      {/* Bouton supprimer */}
                       <button
                         type="button"
                         onClick={handleRemovePhoto}
@@ -656,13 +645,11 @@ useEffect(() => {
                       </button>
                     </>
                   ) : photoAction === PhotoAction.REMOVE ? (
-                    /* État : photo supprimée (en attente d'enregistrement) */
                     <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-red-300 bg-red-50 flex flex-col items-center justify-center">
                       <Trash2 className="w-6 h-6 text-red-400 mb-1" />
                       <span className="text-[10px] text-red-500 font-medium">Supprimée</span>
                     </div>
                   ) : (
-                    /* État : pas de photo (upload initial) */
                     <label className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
                       <Camera className="w-7 h-7 text-gray-300 group-hover:text-blue-400 transition-colors" />
                       <span className="text-[10px] text-gray-400 mt-1 group-hover:text-blue-500">
@@ -678,9 +665,7 @@ useEffect(() => {
                   )}
                 </div>
 
-                {/* Actions sous la photo */}
                 <div className="mt-3 space-y-2">
-                  {/* Bouton upload (toujours visible sauf si déjà en upload) */}
                   {photoAction !== PhotoAction.UPLOAD_NEW && (
                     <label className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                       photoAction === PhotoAction.REMOVE
@@ -698,7 +683,6 @@ useEffect(() => {
                     </label>
                   )}
 
-                  {/* Bouton annuler (visible si modification en cours) */}
                   {photoAction !== PhotoAction.KEEP && (
                     <button
                       type="button"
@@ -711,7 +695,6 @@ useEffect(() => {
                   )}
                 </div>
 
-                {/* Messages */}
                 {photoError && (
                   <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
@@ -777,17 +760,14 @@ useEffect(() => {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                    Spécialité <span className="text-red-500">*</span>
+                    Spécialité
                   </label>
                   <input
                     type="text"
                     value={form.specialty}
                     onChange={(e) => handleChange("specialty", e.target.value)}
-                    className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all ${
-                      errors.specialty ? "border-red-300 bg-red-50" : "border-gray-200"
-                    }`}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all"
                   />
-                  {errors.specialty && <p className="text-xs text-red-500 mt-1">{errors.specialty}</p>}
                 </div>
               </div>
             </div>
@@ -805,24 +785,21 @@ useEffect(() => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Institution <span className="text-red-500">*</span>
+                  Institution
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <select
                     value={form.institutionId}
                     onChange={(e) => handleChange("institutionId", e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none bg-white transition-all ${
-                      errors.institutionId ? "border-red-300 bg-red-50" : "border-gray-200"
-                    }`}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none bg-white transition-all"
                   >
-                    <option value="">Sélectionner</option>
+                    <option value="">Aucune institution / chercheur externe</option>
                     {institutions.map((inst) => (
                       <option key={inst.id} value={inst.id}>{inst.acronym} — {inst.name}</option>
                     ))}
                   </select>
                 </div>
-                {errors.institutionId && <p className="text-xs text-red-500 mt-1">{errors.institutionId}</p>}
               </div>
 
               <div>
@@ -840,76 +817,107 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div>
+              {/* Laboratoires — dropdown multi-sélection avec recherche */}
+              <div className="sm:col-span-2" ref={labDropdownRef}>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Laboratoire
+                  Laboratoires <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <FlaskConical className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select
-                    value={form.laboratoireId}
-                    onChange={(e) => handleChange("laboratoireId", e.target.value)}
-                    disabled={!form.institutionId || loadingLaboratoires}
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none appearance-none transition-all
-                      ${!form.institutionId || loadingLaboratoires
-                        ? "bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200"
-                        : "bg-white border-gray-200"
-                      }`}
+                  <button
+                    type="button"
+                    onClick={() => setLabDropdownOpen(o => !o)}
+                    className={`w-full min-h-[46px] px-3 py-2 border rounded-xl text-sm text-left flex flex-wrap items-center gap-1.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all ${
+                      errors.laboratoireIds ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
+                    }`}
                   >
-                    <option value="">
-                      {!form.institutionId
-                        ? "Sélectionnez d'abord une institution"
-                        : loadingLaboratoires
-                          ? "Chargement..."
-                          : filteredLaboratoires.length === 0
-                            ? "Aucun laboratoire trouvé"
-                            : "Sélectionner un laboratoire"
-                      }
-                    </option>
-                    {filteredLaboratoires.map((labo) => (
-                      <option key={labo.id} value={labo.id}>
-                        {labo.acronym} — {labo.name}
-                      </option>
-                    ))}
-                  </select>
+                    {form.laboratoireIds.length === 0 ? (
+                      <span className="text-gray-400">Sélectionner un ou plusieurs laboratoires</span>
+                    ) : (
+                      filteredLaboratoires
+                        .filter((labo) => form.laboratoireIds.includes(labo.id))
+                        .map((labo) => (
+                          <span
+                            key={labo.id}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg"
+                          >
+                            {labo.acronym}
+                            <span
+                              role="button"
+                              onClick={(e) => { e.stopPropagation(); toggleLaboratoire(labo.id) }}
+                              className="hover:text-blue-900"
+                            >
+                              <X className="w-3 h-3" />
+                            </span>
+                          </span>
+                        ))
+                    )}
+                    <ChevronDown className={`w-4 h-4 text-gray-400 ml-auto flex-shrink-0 transition-transform ${labDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
 
-                  {/* Indicateur de chargement */}
-                  {loadingLaboratoires && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                  {labDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                      <div className="p-2 border-b border-gray-100">
+                        <div className="relative">
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                          <input
+                            type="text"
+                            value={labSearch}
+                            onChange={(e) => setLabSearch(e.target.value)}
+                            placeholder="Rechercher un laboratoire..."
+                            autoFocus
+                            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-56 overflow-y-auto">
+                        {loadingLaboratoires ? (
+                          <div className="flex items-center gap-2 text-xs text-gray-400 p-3">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Chargement...
+                          </div>
+                        ) : filteredLaboratoires.filter((labo) =>
+                            `${labo.acronym} ${labo.name}`.toLowerCase().includes(labSearch.toLowerCase())
+                          ).length === 0 ? (
+                          <p className="text-xs text-gray-400 p-3">Aucun laboratoire trouvé</p>
+                        ) : (
+                          filteredLaboratoires
+                            .filter((labo) =>
+                              `${labo.acronym} ${labo.name}`.toLowerCase().includes(labSearch.toLowerCase())
+                            )
+                            .map((labo) => {
+                              const isSelected = form.laboratoireIds.includes(labo.id)
+                              return (
+                                <button
+                                  type="button"
+                                  key={labo.id}
+                                  onClick={() => toggleLaboratoire(labo.id)}
+                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-blue-50 transition-colors ${
+                                    isSelected ? "bg-blue-50/60" : ""
+                                  }`}
+                                >
+                                  <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                                    isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300"
+                                  }`}>
+                                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                                  </span>
+                                  <FlaskConical className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
+                                  <span className="truncate">{labo.acronym} — {labo.name}</span>
+                                </button>
+                              )
+                            })
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
-
-                {/* Messages d'aide */}
-                {!form.institutionId && (
-                  <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Veuillez sélectionner une institution
+                {errors.laboratoireIds && (
+                  <p className="text-xs text-red-500 mt-1">{errors.laboratoireIds}</p>
+                )}
+                {form.institutionId && !errors.laboratoireIds && (
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Filtré par l'institution sélectionnée.
                   </p>
                 )}
-                {form.institutionId && !loadingLaboratoires && filteredLaboratoires.length === 0 && (
-                  <p className="text-[10px] text-amber-500 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Aucun laboratoire rattaché à cette institution
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Effectif
-                </label>
-                <input
-                  type="number"
-                  value={form.effectif}
-                  onChange={(e) => handleChange("effectif", e.target.value)}
-                  min="0"
-                  className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all ${
-                    errors.effectif ? "border-red-300 bg-red-50" : "border-gray-200"
-                  }`}
-                />
-                {errors.effectif && <p className="text-xs text-red-500 mt-1">{errors.effectif}</p>}
               </div>
             </div>
           </div>
@@ -927,7 +935,6 @@ useEffect(() => {
               Gérez la fiche PDF du chercheur. Le document sera accessible publiquement.
             </p>
 
-            {/* PDF actuel conservé */}
             {pdfAction === PdfAction.KEEP && currentPdfPath && (
               <div className="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-xl mb-4">
                 <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -940,7 +947,7 @@ useEffect(() => {
                   <p className="text-xs text-green-600">Fiche actuelle (conservée)</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <a                    href={getFileUrl(currentPdfPath)}
+                  <a href={getFileUrl(currentPdfPath)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
@@ -960,7 +967,6 @@ useEffect(() => {
               </div>
             )}
 
-            {/* PDF marqué pour suppression */}
             {pdfAction === PdfAction.REMOVE && (
               <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-4">
                 <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
@@ -978,7 +984,6 @@ useEffect(() => {
               </div>
             )}
 
-            {/* Nouveau PDF sélectionné */}
             {pdfAction === PdfAction.UPLOAD_NEW && newPdfFile && (
               <div className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-4">
                 <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -1003,7 +1008,6 @@ useEffect(() => {
               </div>
             )}
 
-            {/* Zone d'upload (toujours visible sauf si nouveau PDF déjà sélectionné) */}
             {pdfAction !== PdfAction.UPLOAD_NEW && (
               <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
                 <div className="flex items-center gap-2 text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
@@ -1031,38 +1035,24 @@ useEffect(() => {
           </div>
 
           {/* ════════════════════════════════════════════════
-              CARTE : PUBLICATIONS & PARTENARIATS
+              CARTE : PARTENARIATS
               ════════════════════════════════════════════════ */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
             <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-6 flex items-center gap-2">
               <Globe className="w-4 h-4 text-gray-400" />
-              Recherche & Collaborations
+              Collaborations
             </h2>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Publications
-                </label>
-                <textarea
-                  value={form.publications}
-                  onChange={(e) => handleChange("publications", e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none resize-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                  Partenariats
-                </label>
-                <textarea
-                  value={form.partenariats}
-                  onChange={(e) => handleChange("partenariats", e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none resize-none transition-all"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Partenariats
+              </label>
+              <textarea
+                value={form.partenariats}
+                onChange={(e) => handleChange("partenariats", e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none resize-none transition-all"
+              />
             </div>
           </div>
 
@@ -1087,7 +1077,6 @@ useEffect(() => {
               BOUTONS D'ACTION
               ════════════════════════════════════════════════ */}
           <div className="flex items-center justify-between pt-4 pb-8">
-            {/* Indicateur de modifications */}
             <div>
               {hasChanges() ? (
                 <p className="text-xs text-amber-600 flex items-center gap-1.5">

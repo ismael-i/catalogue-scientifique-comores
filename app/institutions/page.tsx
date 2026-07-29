@@ -60,7 +60,7 @@ const InstitutionsPage = () => {
       (i) =>
         i.name.toLowerCase().includes(q) ||
         i.acronym.toLowerCase().includes(q) ||
-        i.description.toLowerCase().includes(q),
+        (i.description ?? '').toLowerCase().includes(q),
     )
   }, [items, search])
 

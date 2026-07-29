@@ -335,7 +335,7 @@ export default function RegisterForm() {
           </div>
                     {/* Institution */}
           <div>
-            <label className="text-xs text-gray-600 block mb-1">Institution</label>
+            <label className="text-xs text-gray-600 block mb-1">Institution / Laboratoire </label>
             <input
               type="text"
               value={form.institution}

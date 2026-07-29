@@ -357,16 +357,20 @@ export default function AdminChercheursPage() {
                     </td>
 
                     {/* Colonne Laboratoire */}
-                    <td className="px-4 py-4 text-xs text-gray-500 hidden lg:table-cell">
-                      {c.laboratoire ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <FlaskConical className="w-3 h-3 text-gray-300" />
-                          {c.laboratoire.acronym}
-                        </span>
-                      ) : (
-                        <span className="text-gray-300">—</span>
-                      )}
-                    </td>
+
+                      <td className="px-4 py-4 text-xs text-gray-500 hidden lg:table-cell">
+                        {c.laboratoires && c.laboratoires.length > 0 ? (
+                          <span className="inline-flex items-center gap-1.5" title={c.laboratoires.map(l => l.acronym).join(', ')}>
+                            <FlaskConical className="w-3 h-3 text-gray-300" />
+                            {c.laboratoires[0].acronym}
+                            {c.laboratoires.length > 1 && (
+                              <span className="text-gray-400">+{c.laboratoires.length - 1}</span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
 
                     {/* Colonne Spécialité */}
                     <td className="px-4 py-4 text-xs text-gray-500">

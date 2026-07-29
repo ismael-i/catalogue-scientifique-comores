@@ -248,7 +248,12 @@ export default function NouvellePublicationPage() {
                   <button key={c.id} type="button" onClick={() => addAuthor(c.id)}
                     className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2"
                     disabled={authorIds.includes(c.id)}>
-                    {c.name} {c.laboratoireName ? `(${c.laboratoireName})` : ""}
+                    {c.name}
+                    {c.laboratoires && c.laboratoires.length > 0 && (
+                      <span className="text-gray-400">
+                        ({c.laboratoires.map(l => l.acronym).join(', ')})
+                      </span>
+                    )}
                     {authorIds.includes(c.id) && <span className="text-green-500 ml-auto">✓</span>}
                   </button>
                 ))}
